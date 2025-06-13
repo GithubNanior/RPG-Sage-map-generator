@@ -6,8 +6,42 @@
         <title>RPG Sage map generator</title>
     </head>
     <body>
-        <p>
-            Pelly morphy and <a href="www.example.com">example pages</a>.
-        </p>
+        <header>
+            <a href="https://rpgsage.io/">RPG Sage</a>
+        </header>
+        <main>
+            <h1>Map file generator</h1>
+            <div id="container">
+                <div>
+                    <div class="tab-button-container" id="tabs">
+                        <button class="tab-button" value="main">Main</button>
+                        <button class="tab-button" value="terrain">Terrain</button>
+                        <button class="tab-button" value="aura">Aura</button>
+                        <button class="tab-button" value="token">Tokens</button>
+                        <button class="tab-button" value="file">File</button>
+                    </div>
+                    <form id="settings-form">
+                        <fieldset id="tab-main">
+                        </fieldset>
+                        <fieldset id="tab-terrain">
+
+                        </fieldset>
+                        <fieldset id="tab-aura">
+
+                        </fieldset>
+                        <fieldset id="tab-token">
+
+                        </fieldset>
+                        <fieldset id="tab-file">
+
+                        </fieldset>
+                    </form>
+                </div>
+                <div>
+                    <h2>Preview</h2>
+                    <div id="preview"></div>
+                </div>
+            </div>
+        </main>
     </body>
 </html>
