@@ -21,7 +21,35 @@
                         <button class="tab-button" value="file">File</button>
                     </div>
                     <form id="settings-form">
-                        <fieldset id="tab-main">
+                        <fieldset class="flex column gap-10" id="tab-main">
+                            <div>
+                                <label for="name-field">Name</label>
+                                <input type="text" name="name" id="name-field">
+                            </div>
+                            <div>
+                                <label for="map-url-field">Map url</label>
+                                <input type="text" name="mapURL" id="map-url-field">
+                            </div>
+                            <div class="flex gap-10">
+                                <div class="grow">
+                                    <label for="grid-columns-field">Grid columns</label>
+                                    <input type="number" name="gridColumns" id="grid-columns-field" value="5">
+                                </div>
+                                <div class="grow">
+                                    <label for="grid-rows-field">Grid rows</label>
+                                    <input type="number" name="gridRows" id="grid-rows-field" value="5">
+                                </div>
+                            </div>
+                            <div class="flex gap-10">
+                                <div class="grow">
+                                    <label for="spawn-x-field">Spawn x</label>
+                                    <input type="number" name="spawnX" id="spawn-x-field" value="2">
+                                </div>
+                                <div class="grow">
+                                    <label for="spawn-y-field">Spawn y</label>
+                                    <input type="number" name="spawnY" id="spawn-y-field" value="2">
+                                </div>
+                            </div>
                         </fieldset>
                         <fieldset id="tab-terrain">
 
