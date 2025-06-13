@@ -78,8 +78,9 @@ h2 {
 }
 
 fieldset {
-    border: 1px solid black;
     margin: 0;
+    padding: 1ch;
+    border: 1px solid black;
 }
 
 label, input {
