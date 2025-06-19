@@ -29,14 +29,15 @@ class DataList
         return element;
     }
 
-    set(id, key, value)
+    set(id, values)
     {
         const data = this.listElements[id];
         if (data != undefined)
         {
-            data[key] = value;
+            Object.assign(data, values);
             this.onModify.invoke(data);
         }
+        
     }
 
     remove(id)

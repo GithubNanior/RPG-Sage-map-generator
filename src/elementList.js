@@ -88,7 +88,9 @@ class ElementList
         {
             field.value = data[field.name];
             field.onchange = () => {
-                this.dataList.set(data.id, field.name, field.value);
+                this.dataList.set(data.id, {
+                    [field.name]: field.value
+                });
             };
         }
     }

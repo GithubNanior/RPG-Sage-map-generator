@@ -193,8 +193,10 @@ function getOrCreateTerrainToken(id)
                 y: Math.round(tilePos.y * 100) / 100
             };
 
-            Form.terrainList.dataList.set(id, "x", tilePos.x);
-            Form.terrainList.dataList.set(id, "y", tilePos.y);
+            Form.terrainList.dataList.set(id, {
+                x: tilePos.x,
+                y: tilePos.y
+            });
         });
 
         terrainLayer.add(terrainToken);
