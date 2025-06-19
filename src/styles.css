@@ -45,8 +45,37 @@ header a {
 }
 
 .tab-button:hover {
-    cursor: pointer;
     scale: 1.1;
+}
+
+.list-element {
+    width: 100%;
+    padding: 1rem;
+    font-size: large;
+    font-weight: bold;
+    background-color: white;
+    border: 1px solid black;
+}
+
+.list-element-header {
+    display: flex;
+    align-items: center;
+    gap: 1ch;
+}
+
+.list-element-header > img {
+    height: 1lh;
+}
+
+li:not(:first-child) {
+    margin-top: 1ch;
+}
+
+.list-edit {
+    padding: 1ch;
+    background-color: white;
+    border: 1px solid black;
+    border-top: none;
 }
 
 .flex {
@@ -55,6 +84,10 @@ header a {
 
 .flex.column {
     flex-direction: column;
+}
+
+.flex.x-between {
+    justify-content: space-between;
 }
 
 .hidden {
@@ -75,6 +108,17 @@ h1 {
 
 h2 {
     margin: 0;
+}
+
+button {
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
 }
 
 fieldset {

@@ -1,4 +1,7 @@
 import * as Preview from "./preview";
+import { DataList } from "./dataList";
+
+const terrainList = new DataList();
 
 let name = "";
 let mapURL = "";
@@ -50,6 +53,7 @@ export {
     setMapURL,
     setGrid,
     setSpawn,
+    terrainList,
     setData,
     getData
 };

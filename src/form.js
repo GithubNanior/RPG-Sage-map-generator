@@ -1,4 +1,5 @@
 import * as Data from "./data";
+import { ElementList } from "./elementList";
 
 //Fetching fields
 const nameField = document.querySelector("#name-field");
@@ -30,12 +31,25 @@ spawnYField.addEventListener("change", () => {
     Data.setSpawn(spawnXField.value, spawnYField.value);
 });
 
+// Terrajn list
+const terrainList = new ElementList(Data.terrainList, document.querySelector("#terrain-list"));
+
+Data.terrainList.onAdd.subscribe((data) => terrainList.add(data));
+Data.terrainList.onModify.subscribe((data) => terrainList.update(data));
+Data.terrainList.onRemove.subscribe((id) => terrainList.remove(id));
+
+document.querySelector("#terrain-add").addEventListener("click", (event) => {
+    Data.terrainList.add();
+    event.preventDefault();
+}) ;
+
 //Setting defaults
 Data.setName(nameField.value);
 Data.setMapURL(mapURLField.value);
 Data.setGrid(gridColumnsField.value, gridRowsField.value);
 Data.setSpawn(spawnXField.value, spawnYField.value);
 
+//Programmatic setter functions
 function setSpawn(x, y)
 {
     spawnXField.value = x;
