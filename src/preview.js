@@ -1,6 +1,5 @@
 import Konva from "konva";
 import SpawnIcon from "./images/spawn.svg";
-import * as Data from "./data";
 import * as Form from "./form";
 
 const container = document.querySelector("#preview");
@@ -31,8 +30,6 @@ stage.add(gridLayer);
 
 const spawnLayer = new Konva.Layer();
 stage.add(spawnLayer);
-
-const tooltipLayer = new Konva.Layer();
 
 function setMap(mapURL)
 {
@@ -126,15 +123,15 @@ function setSpawn(x, y)
         draggable: true
     });
 
-    spawnMarker.on("dragend", ()=>{
+    spawnMarker.on("dragend", () => {
         let tilePos = canvasToTilePos(spawnMarker.x(), spawnMarker.y());
         tilePos = {
             x: Math.round(tilePos.x * 100) / 100,
             y: Math.round(tilePos.y * 100) / 100
-        }
+        };
 
         Form.setSpawn(tilePos.x, tilePos.y);
-    })
+    });
 
     spawnLayer.add(spawnMarker);
 }
@@ -144,7 +141,7 @@ function canvasToTilePos(x, y)
     return {
         x: x / tileWidth + 1,
         y: y / tileHeight + 1
-    }
+    };
 }
 
 function tileToCanvasPos(x, y)
@@ -152,12 +149,10 @@ function tileToCanvasPos(x, y)
     return {
         x: (x - 1) * tileWidth,
         y: (y - 1) * tileHeight
-    }
+    };
 }
 
-window.addEventListener("resize", (event) => { 
-    resizePreview();
-})
+window.addEventListener("resize", (event) => resizePreview());
 
 export {
     setMap,
