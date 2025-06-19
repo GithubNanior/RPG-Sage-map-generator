@@ -3,6 +3,10 @@ import { DataList } from "./dataList";
 
 const terrainList = new DataList();
 
+terrainList.onAdd.subscribe((data) => Preview.showTerrainFeature(data));
+terrainList.onModify.subscribe((data) => Preview.showTerrainFeature(data));
+terrainList.onRemove.subscribe((id) => Preview.hideTerrainFeature(id));
+
 let name = "";
 let mapURL = "";
 let gridRows = 0;

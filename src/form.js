@@ -57,5 +57,6 @@ function setSpawn(x, y)
 }
 
 export {
-    setSpawn
+    setSpawn,
+    terrainList
 };

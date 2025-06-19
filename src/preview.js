@@ -22,6 +22,8 @@ let gridRows = 1;
 let spawnX = 1;
 let spawnY = 1;
 
+const terrainFeatures = [];
+
 const mapLayer = new Konva.Layer();
 stage.add(mapLayer);
 
@@ -30,6 +32,9 @@ stage.add(gridLayer);
 
 const spawnLayer = new Konva.Layer();
 stage.add(spawnLayer);
+
+const terrainLayer = new Konva.Layer();
+stage.add(terrainLayer);
 
 function setMap(mapURL)
 {
@@ -98,6 +103,17 @@ function setGrid(columns, rows)
     }
 
     setSpawn(spawnX, spawnY);
+    for (const terrainFeature of terrainFeatures)
+    {
+        if (terrainFeature)
+        {
+            showTerrainFeature(terrainFeature);
+        }
+        else
+        {
+            hideTerrainFeature(terrainFeature.id);
+        }
+    }
 }
 
 function setSpawn(x, y)
@@ -136,6 +152,57 @@ function setSpawn(x, y)
     spawnLayer.add(spawnMarker);
 }
 
+function showTerrainFeature(data)
+{
+    terrainFeatures[data.id] = data;
+    const terrainToken = getOrCreateTerrainToken(data.id);
+    terrainToken.setAttrs({
+        ...tileToCanvasPos(data.x, data.y),
+        width: data.width * tileWidth,
+        height: data.height * tileHeight,
+        visible: false
+    });
+
+    const image = new Image();
+    image.onload = () => {
+        terrainToken.image(image);
+        terrainToken.visible(true);
+    };
+    image.src = data.url;
+}
+
+function hideTerrainFeature(id)
+{
+    terrainFeatures[id] = undefined;
+    terrainLayer.children[id].visible(false);
+}
+
+function getOrCreateTerrainToken(id)
+{
+    while (id >= terrainLayer.children.length)
+    {
+        const terrainToken = new Konva.Image({
+            draggable: true,
+            visible: false
+        });
+
+        terrainToken.on("dragend", () => {
+            let tilePos = canvasToTilePos(terrainToken.x(), terrainToken.y());
+            tilePos = {
+                x: Math.round(tilePos.x * 100) / 100,
+                y: Math.round(tilePos.y * 100) / 100
+            };
+
+            Form.terrainList.dataList.set(id, "x", tilePos.x);
+            Form.terrainList.dataList.set(id, "y", tilePos.y);
+        });
+
+        terrainLayer.add(terrainToken);
+    }
+
+    return terrainLayer.children[id];
+}
+
 function canvasToTilePos(x, y)
 {
     return {
@@ -157,5 +224,7 @@ window.addEventListener("resize", (event) => resizePreview());
 export {
     setMap,
     setGrid,
-    setSpawn
+    setSpawn,
+    showTerrainFeature,
+    hideTerrainFeature
 };
