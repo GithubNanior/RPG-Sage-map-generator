@@ -14,30 +14,29 @@ let gridColumns = 0;
 let spawnX = 0;
 let spawnY = 0;
 
-function setName(name)
+function setName(newName)
 {
-    this.name = name;
+    name = newName;
 }
 
-function setMapURL(URL)
+function setMapURL(newURL)
 {
-    this.mapURL = URL;
-
+    mapURL = newURL;
     Preview.setMap(URL);
 }
 
 function setGrid(columns, rows)
 {
-    this.gridColumns = columns;
-    this.gridRows = rows;
+    gridColumns = columns;
+    gridRows = rows;
 
     Preview.setGrid(columns, rows);
 }
 
 function setSpawn(x, y)
 {
-    this.spawnX = x;
-    this.spawnY = y;
+    spawnX = x;
+    spawnY = y;
 
     Preview.setSpawn(x, y);
 }
