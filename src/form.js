@@ -10,7 +10,7 @@ const spawnXField = document.querySelector("#spawn-x-field");
 const spawnYField = document.querySelector("#spawn-y-field");
 
 //Binding input events
-mapURLField.addEventListener("change", () => {
+nameField.addEventListener("change", () => {
     Data.setName(nameField.value);
 });
 mapURLField.addEventListener("change", () => {
