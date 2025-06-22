@@ -1,6 +1,8 @@
 import * as Data from "./data";
 import { ElementList } from "./elementList";
 
+const terrainList = new ElementList(document.querySelector("#terrain-list"));
+
 //Fetching fields
 const nameField = document.querySelector("#name-field");
 const mapURLField = document.querySelector("#map-url-field");
@@ -31,32 +33,35 @@ spawnYField.addEventListener("change", () => {
     Data.setSpawn(spawnXField.value, spawnYField.value);
 });
 
-// Terrajn list
-const terrainList = new ElementList(Data.terrainList, document.querySelector("#terrain-list"));
-
-Data.terrainList.onAdd.subscribe((data) => terrainList.add(data));
-Data.terrainList.onModify.subscribe((data) => terrainList.update(data));
-Data.terrainList.onRemove.subscribe((id) => terrainList.remove(id));
-
 document.querySelector("#terrain-add").addEventListener("click", (event) => {
     Data.terrainList.add();
     event.preventDefault();
-}) ;
+});
 
-//Setting defaults
-Data.setName(nameField.value);
-Data.setMapURL(mapURLField.value);
-Data.setGrid(gridColumnsField.value, gridRowsField.value);
-Data.setSpawn(spawnXField.value, spawnYField.value);
-
-//Programmatic setter functions
-function setSpawn(x, y)
+function link()
 {
-    spawnXField.value = x;
-    spawnYField.value = y;
+    terrainList.bindDataList(Data.terrainList);
+
+    Data.onSpawnSet.subscribe((x, y) => {
+        spawnXField.value = x;
+        spawnYField.value = y;
+    });
+
+    Data.terrainList.onAdd.subscribe((data) => terrainList.add(data));
+    Data.terrainList.onModify.subscribe((data) => terrainList.update(data));
+    Data.terrainList.onRemove.subscribe((id) => terrainList.remove(id));
+}
+
+function start()
+{
+    Data.setName(nameField.value);
+    Data.setMapURL(mapURLField.value);
+    Data.setGrid(gridColumnsField.value, gridRowsField.value);
+    Data.setSpawn(spawnXField.value, spawnYField.value);
 }
 
 export {
-    setSpawn,
+    link,
+    start,
     terrainList
 };

@@ -1,6 +1,7 @@
 import Konva from "konva";
 import SpawnIcon from "./images/spawn.svg";
 import * as Form from "./form";
+import * as Data from "./data";
 
 const container = document.querySelector("#preview");
 
@@ -146,7 +147,7 @@ function setSpawn(x, y)
             y: Math.round(tilePos.y * 100) / 100
         };
 
-        Form.setSpawn(tilePos.x, tilePos.y);
+        Data.setSpawn(tilePos.x, tilePos.y);
     });
 
     spawnLayer.add(spawnMarker);
@@ -221,12 +222,19 @@ function tileToCanvasPos(x, y)
     };
 }
 
+function link()
+{
+    Data.onMapSet.subscribe((url) => setMap(url));
+    Data.onGridSet.subscribe((columns, rows) => setGrid(columns, rows));
+    Data.onSpawnSet.subscribe((x, y) => setSpawn(x, y));
+
+    Data.terrainList.onAdd.subscribe((data) => showTerrainFeature(data));
+    Data.terrainList.onModify.subscribe((data) => showTerrainFeature(data));
+    Data.terrainList.onRemove.subscribe((id) => hideTerrainFeature(id));
+}
+
 window.addEventListener("resize", (event) => resizePreview());
 
 export {
-    setMap,
-    setGrid,
-    setSpawn,
-    showTerrainFeature,
-    hideTerrainFeature
+    link
 };

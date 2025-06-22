@@ -3,9 +3,8 @@ import listElementHTML from "./listElement.html";
 
 class ElementList
 {
-    constructor(dataList, listContainer)
+    constructor(listContainer)
     {
-        this.dataList = dataList;
         this.listContainer = listContainer;
         this.listElements = [];
         this.editForm = parseHtml(editFormHTML);
@@ -93,6 +92,11 @@ class ElementList
                 });
             };
         }
+    }
+
+    bindDataList(dataList)
+    {
+        this.dataList = dataList;
     }
 }
 
