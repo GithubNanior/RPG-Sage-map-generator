@@ -24,18 +24,26 @@ let spawnX = 1;
 let spawnY = 1;
 
 const terrainFeatures = [];
+const auras = [];
+const tokens = [];
 
 const mapLayer = new Konva.Layer();
 stage.add(mapLayer);
+
+const terrainLayer = new Konva.Layer();
+stage.add(terrainLayer);
+
+const auraLayer = new Konva.Layer();
+stage.add(auraLayer);
+
+const tokenLayer = new Konva.Layer();
+stage.add(tokenLayer);
 
 const gridLayer = new Konva.Layer();
 stage.add(gridLayer);
 
 const spawnLayer = new Konva.Layer();
 stage.add(spawnLayer);
-
-const terrainLayer = new Konva.Layer();
-stage.add(terrainLayer);
 
 function setMap(mapURL)
 {
@@ -108,11 +116,33 @@ function setGrid(columns, rows)
     {
         if (terrainFeature)
         {
-            showTerrainFeature(terrainFeature);
+            showToken(terrainLayer, terrainFeatures, Data.terrainList, terrainFeature);
         }
         else
         {
-            hideTerrainFeature(terrainFeature.id);
+            hideToken(terrainLayer, terrainFeatures, terrainFeature.id);
+        }
+    }
+    for (const aura of auras)
+    {
+        if (aura)
+        {
+            showToken(auraLayer, auras, Data.auraList, aura);
+        }
+        else
+        {
+            hideToken(auraLayer, auras, aura.id);
+        }
+    }
+    for (const token of tokens)
+    {
+        if (token)
+        {
+            showToken(tokenLayer, tokens, Data.tokenList, token);
+        }
+        else
+        {
+            hideToken(tokenLayer, token, token.id);
         }
     }
 }
@@ -153,11 +183,11 @@ function setSpawn(x, y)
     spawnLayer.add(spawnMarker);
 }
 
-function showTerrainFeature(data)
+function showToken(layer, cacheList, dataList, data)
 {
-    terrainFeatures[data.id] = data;
-    const terrainToken = getOrCreateTerrainToken(data.id);
-    terrainToken.setAttrs({
+    cacheList[data.id] = data;
+    const token = getOrCreateToken(layer, dataList, data.id);
+    token.setAttrs({
         ...tileToCanvasPos(data.x, data.y),
         width: data.width * tileWidth,
         height: data.height * tileHeight,
@@ -166,44 +196,44 @@ function showTerrainFeature(data)
 
     const image = new Image();
     image.onload = () => {
-        terrainToken.image(image);
-        terrainToken.visible(true);
+        token.image(image);
+        token.visible(true);
     };
     image.src = data.url;
 }
 
-function hideTerrainFeature(id)
+function hideToken(layer, cacheList, id)
 {
-    terrainFeatures[id] = undefined;
-    terrainLayer.children[id].visible(false);
+    cacheList[id] = undefined;
+    layer.children[id].visible(false);
 }
 
-function getOrCreateTerrainToken(id)
+function getOrCreateToken(layer, dataList, id)
 {
-    while (id >= terrainLayer.children.length)
+    while (id >= layer.children.length)
     {
-        const terrainToken = new Konva.Image({
+        const token = new Konva.Image({
             draggable: true,
             visible: false
         });
 
-        terrainToken.on("dragend", () => {
-            let tilePos = canvasToTilePos(terrainToken.x(), terrainToken.y());
+        token.on("dragend", () => {
+            let tilePos = canvasToTilePos(token.x(), token.y());
             tilePos = {
                 x: Math.round(tilePos.x * 100) / 100,
                 y: Math.round(tilePos.y * 100) / 100
             };
 
-            Form.terrainList.dataList.set(id, {
+            dataList.set(id, {
                 x: tilePos.x,
                 y: tilePos.y
             });
         });
 
-        terrainLayer.add(terrainToken);
+        layer.add(token);
     }
 
-    return terrainLayer.children[id];
+    return layer.children[id];
 }
 
 function canvasToTilePos(x, y)
@@ -228,9 +258,17 @@ function link()
     Data.onGridSet.subscribe((columns, rows) => setGrid(columns, rows));
     Data.onSpawnSet.subscribe((x, y) => setSpawn(x, y));
 
-    Data.terrainList.onAdd.subscribe((data) => showTerrainFeature(data));
-    Data.terrainList.onModify.subscribe((data) => showTerrainFeature(data));
-    Data.terrainList.onRemove.subscribe((id) => hideTerrainFeature(id));
+    Data.terrainList.onAdd.subscribe((data) => showToken(terrainLayer, terrainFeatures, Data.terrainList, data));
+    Data.terrainList.onModify.subscribe((data) => showToken(terrainLayer, terrainFeatures, Data.terrainList, data));
+    Data.terrainList.onRemove.subscribe((id) => hideToken(terrainLayer, terrainFeatures, id));
+
+    Data.auraList.onAdd.subscribe((data) => showToken(auraLayer, auras, Data.auraList, data));
+    Data.auraList.onModify.subscribe((data) => showToken(auraLayer, auras, Data.auraList, data));
+    Data.auraList.onRemove.subscribe((id) => hideToken(auraLayer, auras, id));
+
+    Data.tokenList.onAdd.subscribe((data) => showToken(tokenLayer, tokens, Data.tokenList, data));
+    Data.tokenList.onModify.subscribe((data) => showToken(tokenLayer, tokens, Data.tokenList, data));
+    Data.tokenList.onRemove.subscribe((id) => hideToken(tokenLayer, tokens, id));
 }
 
 window.addEventListener("resize", (event) => resizePreview());

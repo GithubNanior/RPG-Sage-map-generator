@@ -2,6 +2,8 @@ import * as Data from "./data";
 import { ElementList } from "./elementList";
 
 const terrainList = new ElementList(document.querySelector("#terrain-list"));
+const auraList = new ElementList(document.querySelector("#aura-list"));
+const tokenList = new ElementList(document.querySelector("#token-list"));
 
 //Fetching fields
 const nameField = document.querySelector("#name-field");
@@ -38,9 +40,21 @@ document.querySelector("#terrain-add").addEventListener("click", (event) => {
     event.preventDefault();
 });
 
+document.querySelector("#aura-add").addEventListener("click", (event) => {
+    Data.auraList.add();
+    event.preventDefault();
+});
+
+document.querySelector("#token-add").addEventListener("click", (event) => {
+    Data.tokenList.add();
+    event.preventDefault();
+});
+
 function link()
 {
     terrainList.bindDataList(Data.terrainList);
+    auraList.bindDataList(Data.auraList);
+    tokenList.bindDataList(Data.tokenList);
 
     Data.onSpawnSet.subscribe((x, y) => {
         spawnXField.value = x;
@@ -50,6 +64,14 @@ function link()
     Data.terrainList.onAdd.subscribe((data) => terrainList.add(data));
     Data.terrainList.onModify.subscribe((data) => terrainList.update(data));
     Data.terrainList.onRemove.subscribe((id) => terrainList.remove(id));
+    
+    Data.auraList.onAdd.subscribe((data) => auraList.add(data));
+    Data.auraList.onModify.subscribe((data) => auraList.update(data));
+    Data.auraList.onRemove.subscribe((id) => auraList.remove(id));
+
+    Data.tokenList.onAdd.subscribe((data) => tokenList.add(data));
+    Data.tokenList.onModify.subscribe((data) => tokenList.update(data));
+    Data.tokenList.onRemove.subscribe((id) => tokenList.remove(id));
 }
 
 function start()
@@ -63,5 +85,7 @@ function start()
 export {
     link,
     start,
-    terrainList
+    terrainList,
+    auraList,
+    tokenList
 };

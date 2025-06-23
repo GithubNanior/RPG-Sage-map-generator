@@ -2,6 +2,8 @@ import { Event } from "./event";
 import { DataList } from "./dataList";
 
 const terrainList = new DataList();
+const auraList = new DataList();
+const tokenList = new DataList();
 
 let name = "";
 let mapURL = "";
@@ -62,6 +64,8 @@ export {
     onGridSet,
     onSpawnSet,
     terrainList,
+    auraList,
+    tokenList,
     setData,
     getData
 };
