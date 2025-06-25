@@ -61,10 +61,6 @@ header a {
     height: 1lh;
 }
 
-li:not(:first-child) {
-    margin-top: 1ch;
-}
-
 .list-edit {
     padding: 1ch;
     background-color: white;
