@@ -42,6 +42,60 @@ header a {
     scale: 1.1;
 }
 
+.dropdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 20ch;
+    height: 2lh;
+    position: relative;
+
+    border: 1px solid black;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: small;
+}
+
+.dropdown:hover {
+    background-color: white;
+}
+
+.dropdown-body {
+    scale: 1 0;
+    transform-origin: top;
+    transition: scale 0.1s;
+
+    position: absolute;
+    left: -1px;
+    top: calc(100%);
+
+    background-color: white;
+}
+
+.dropdown-body li {
+    display: flex;
+    width: 20ch;
+}
+
+.dropdown-body li > *:first-child {
+    flex-grow: 1;
+}
+
+.dropdown-body li > *:not(:first-child) {
+    flex-shrink: 0;
+}
+
+.dropdown-body button {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.dropdown:hover > .dropdown-body {
+    scale: 1 1;
+}
+
 .list-element {
     width: 100%;
     padding: 1ch;

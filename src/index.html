@@ -73,7 +73,27 @@
                             </ul>
                         </fieldset>
                         <fieldset id="tab-file">
+                            <textarea rows="10" style="width: 100%; resize: vertical;" id="output-area"></textarea>
+                            <div class="flex gap-10">
+                                <button type="button" id="output-generate">Generate txt</button>
+                                <button type="button" id="output-load">Load txt</button>
+                                <button type="button" id="output-download">Download</button>
+                            </div>
+                            
+                            
+                            <hr>
+                            
+                            <div class="flex gap-10">
+                                <button type="button" id="save">Save</button>
+                                <div type="button" class="dropdown" id="load">
+                                    Load
 
+                                    <div class="dropdown-body">
+                                        <ul>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </fieldset>
                     </form>
                 </div>
