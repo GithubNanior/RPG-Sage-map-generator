@@ -1,5 +1,6 @@
 import editFormHTML from "./editForm.html";
 import listElementHTML from "./listElement.html";
+import { parseHtml } from "./utils";
 
 class ElementList
 {
@@ -98,13 +99,6 @@ class ElementList
     {
         this.dataList = dataList;
     }
-}
-
-function parseHtml(text)
-{
-    let node = document.createElement("div");
-    node.innerHTML = text;
-    return node.childNodes[0];
 }
 
 export {
