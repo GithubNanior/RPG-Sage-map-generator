@@ -43,14 +43,54 @@ function setSpawn(x, y)
     onSpawnSet.invoke(x, y);
 }
 
-function setData()
+function serializeData()
 {
-    
+    return [
+        serializeMap(),
+        ...terrainList.listElements.filter((terrain) => terrain).map((terrain) => serializeTerrain(terrain)),
+        ...auraList.listElements.filter((aura) => aura).map((aura) => serializeAura(aura)),
+        ...tokenList.listElements.filter((token) => token).map((token) => serializeToken(token))
+    ].join("\n");
 }
 
-function getData()
+function serializeMap()
 {
+    return `[map]
+${mapURL}
+name=${name}
+grid=${gridColumns}x${gridRows}
+spawn=${spawnX},${spawnY}
+`;
+}
 
+function serializeTerrain(token)
+{
+    return `[terrain]
+${token.url}
+name=${token.name}
+size=${token.width}x${token.height}
+position=${token.x},${token.y}
+`;
+}
+
+function serializeAura(aura)
+{
+    return `[aura]
+${aura.url}
+name=${aura.name}
+size=${aura.width}x${aura.height}
+position=${aura.x},${aura.y}
+`;
+}
+
+function serializeToken(token)
+{
+    return `[token]
+${token.url}
+name=${token.name}
+size=${token.width}x${token.height}
+position=${token.x},${token.y}
+`;
 }
 
 export {
@@ -65,6 +105,5 @@ export {
     terrainList,
     auraList,
     tokenList,
-    setData,
-    getData
+    serializeData
 };

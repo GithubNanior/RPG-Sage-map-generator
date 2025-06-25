@@ -13,6 +13,8 @@ const gridRowsField = document.querySelector("#grid-rows-field");
 const spawnXField = document.querySelector("#spawn-x-field");
 const spawnYField = document.querySelector("#spawn-y-field");
 
+const outputArea = document.querySelector("#output-area");
+
 //Binding input events
 nameField.addEventListener("change", () => {
     Data.setName(nameField.value);
@@ -47,6 +49,11 @@ document.querySelector("#aura-add").addEventListener("click", (event) => {
 
 document.querySelector("#token-add").addEventListener("click", (event) => {
     Data.tokenList.add();
+    event.preventDefault();
+});
+
+document.querySelector("#output-generate").addEventListener("click", (event) => {
+    outputArea.value = Data.serializeData();
     event.preventDefault();
 });
 
