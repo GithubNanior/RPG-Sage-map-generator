@@ -5,6 +5,11 @@ function parseHtml(text)
     return node.childNodes[0];
 }
 
+function isNullOrWhitespace(string){
+    return string == null || string.match(/^ *$/) != null;
+}
+
 export {
-    parseHtml
+    parseHtml,
+    isNullOrWhitespace
 };
