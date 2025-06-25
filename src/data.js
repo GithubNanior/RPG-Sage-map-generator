@@ -38,7 +38,6 @@ function setGrid(columns, rows)
 
 function setSpawn(x, y)
 {
-    console.log(`set spawn to (${x}, ${y})`)
     spawnX = x;
     spawnY = y;
     onSpawnSet.invoke(x, y);
