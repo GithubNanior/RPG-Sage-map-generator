@@ -1,4 +1,5 @@
 import * as Data from "./data";
+import { downloadTXT } from "./utils";
 import { ElementList } from "./elementList";
 
 const terrainList = new ElementList(document.querySelector("#terrain-list"));
@@ -54,6 +55,11 @@ document.querySelector("#token-add").addEventListener("click", (event) => {
 
 document.querySelector("#output-generate").addEventListener("click", (event) => {
     outputArea.value = Data.serializeData();
+    event.preventDefault();
+});
+
+document.querySelector("#output-download").addEventListener("click", (event) => {
+    downloadTXT(Data.mapName.replaceAll(" ", "_"), Data.serializeData())
     event.preventDefault();
 });
 

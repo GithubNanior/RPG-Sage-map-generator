@@ -94,6 +94,7 @@ position=${token.x},${token.y}
 }
 
 export {
+    name as mapName,
     setName,
     setMapURL,
     setGrid,
