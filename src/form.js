@@ -1,8 +1,9 @@
 import * as Data from "./data";
 import * as Save from "./save";
 import { LogError } from "./logger";
-import { downloadTXT } from "./utils";
+import { parseHtml, downloadTXT } from "./utils";
 import { ElementList } from "./elementList";
+import loadOptionHTML from "./loadOption.html";
 
 const terrainList = new ElementList(document.querySelector("#terrain-list"));
 const auraList = new ElementList(document.querySelector("#aura-list"));
@@ -17,6 +18,8 @@ const spawnXField = document.querySelector("#spawn-x-field");
 const spawnYField = document.querySelector("#spawn-y-field");
 
 const outputArea = document.querySelector("#output-area");
+const loadTab = document.querySelector("#load");
+const loadOptionContainer = loadTab.querySelector("ul");
 
 //Binding input events
 nameField.addEventListener("change", () => {
@@ -80,6 +83,23 @@ document.querySelector("#save").addEventListener("click", () => {
     }
 });
 
+let dropdownOpen = false;
+loadTab.addEventListener("pointerenter", () => {
+    if (dropdownOpen == false)
+    {
+        for (let i = 0; i < Save.saveCount(); i++)
+        {
+            loadOptionContainer.appendChild(createLoadOption(Save.getKey(i)));
+        }
+        dropdownOpen = true;
+    }
+});
+
+loadTab.addEventListener("pointerleave", () => {
+    loadOptionContainer.innerHTML = "";
+    dropdownOpen = false;
+});
+
 function link()
 {
     terrainList.bindDataList(Data.terrainList);
@@ -102,6 +122,22 @@ function link()
     Data.tokenList.onAdd.subscribe((data) => tokenList.add(data));
     Data.tokenList.onModify.subscribe((data) => tokenList.update(data));
     Data.tokenList.onRemove.subscribe((id) => tokenList.remove(id));
+}
+
+function createLoadOption(name)
+{
+    const loadOption = parseHtml(loadOptionHTML);
+
+    const loadButton = loadOption.querySelector("button[name='load']");
+    loadButton.innerText = name;
+
+    const deleteButton = loadOption.querySelector("button[name='delete']")
+    deleteButton.addEventListener("click", () => {
+        Save.deleteSave(name);
+        loadOption.remove();
+    });
+
+    return loadOption;
 }
 
 function start()
