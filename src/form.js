@@ -1,4 +1,6 @@
 import * as Data from "./data";
+import * as Save from "./save";
+import { LogError } from "./logger";
 import { downloadTXT } from "./utils";
 import { ElementList } from "./elementList";
 
@@ -61,6 +63,21 @@ document.querySelector("#output-generate").addEventListener("click", (event) => 
 document.querySelector("#output-download").addEventListener("click", (event) => {
     downloadTXT(Data.mapName.replaceAll(" ", "_"), Data.serializeData())
     event.preventDefault();
+});
+
+document.querySelector("#save").addEventListener("click", () => {
+    if (isNullOrWhitespace(Data.mapName))
+    {
+        LogError("Map name may not be blank!");
+    }
+    else if (!Save.canSave())
+    {
+        LogError("Unable to save locally!");
+    }
+    else
+    {
+        Save.save(Data.mapName, serializeData());
+    }
 });
 
 function link()
