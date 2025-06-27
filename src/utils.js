@@ -17,8 +17,15 @@ function isNullOrWhitespace(string){
     return string == null || string.match(/^ *$/) != null;
 }
 
+function dequote(value)
+{
+    const regex = /^(?:“[^”]*”|„[^“]*“|„[^”]*”|"[^"]*"|'[^']*'|‘[^’]*’)$/i;
+	return regex.test(value) ? value.slice(1, -1) : value;
+}
+
 export {
     parseHtml,
     downloadTXT,
-    isNullOrWhitespace
+    isNullOrWhitespace,
+    dequote
 };
