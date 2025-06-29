@@ -112,37 +112,37 @@ function setGrid(columns, rows)
     }
 
     setSpawn(spawnX, spawnY);
-    for (const terrainFeature of terrainFeatures)
+    for (let i = 0; i < terrainFeatures.length; i++)
     {
-        if (terrainFeature)
+        if (terrainFeatures[i])
         {
-            showToken(terrainLayer, terrainFeatures, Data.terrainList, terrainFeature);
+            showToken(terrainLayer, terrainFeatures, Data.terrainList, terrainFeatures[i]);
         }
         else
         {
-            hideToken(terrainLayer, terrainFeatures, terrainFeature.id);
+            hideToken(terrainLayer, terrainFeatures, i);
         }
     }
-    for (const aura of auras)
+    for (let i = 0; i < auras.length; i++)
     {
-        if (aura)
+        if (auras[i])
         {
-            showToken(auraLayer, auras, Data.auraList, aura);
+            showToken(auraLayer, auras, Data.auraList, auras[i]);
         }
         else
         {
-            hideToken(auraLayer, auras, aura.id);
+            hideToken(auraLayer, auras, i);
         }
     }
-    for (const token of tokens)
+    for (let i = 0; i < tokens.length; i++)
     {
-        if (token)
+        if (tokens[i])
         {
-            showToken(tokenLayer, tokens, Data.tokenList, token);
+            showToken(tokenLayer, tokens, Data.tokenList, tokens[i]);
         }
         else
         {
-            hideToken(tokenLayer, token, token.id);
+            hideToken(tokenLayer, tokens, i);
         }
     }
 }
