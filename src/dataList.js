@@ -52,6 +52,13 @@ class DataList
 
         return element;
     }
+
+    clear()
+    {
+        for (let i = 0; i < this.listElements.length; i++) {
+            this.remove(i);
+        }
+    }
 }
 
 export {
