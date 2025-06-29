@@ -106,6 +106,16 @@ function link()
     auraList.bindDataList(Data.auraList);
     tokenList.bindDataList(Data.tokenList);
 
+    Data.onNameSet.subscribe((name) => {
+        nameField.value = name;
+    });
+    Data.onMapSet.subscribe((url) => {
+        mapURLField.value = url;
+    });
+    Data.onGridSet.subscribe((rows, columns) => {
+        gridRowsField.value = rows;
+        gridColumnsField.value = columns;
+    });
     Data.onSpawnSet.subscribe((x, y) => {
         spawnXField.value = x;
         spawnYField.value = y;
