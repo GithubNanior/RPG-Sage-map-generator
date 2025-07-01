@@ -1,7 +1,7 @@
 import * as Data from "./data";
 import * as Save from "./save";
 import { LogError } from "./logger";
-import { parseHtml, downloadTXT } from "./utils";
+import { parseHtml, downloadTXT, isNullOrWhitespace } from "./utils";
 import { ElementList } from "./elementList";
 import loadOptionHTML from "./loadOption.html";
 
