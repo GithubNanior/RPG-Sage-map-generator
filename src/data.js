@@ -2,9 +2,30 @@ import { isNullOrWhitespace, dequote } from "./utils";
 import { Event } from "./event";
 import { DataList } from "./dataList";
 
-const terrainList = new DataList();
-const auraList = new DataList();
-const tokenList = new DataList();
+const terrainList = new DataList({
+    name: "New TerrainFeature",
+    url: "",
+    x: 1,
+    y: 1,
+    width: 1,
+    height: 1
+});
+const auraList = new DataList({
+    name: "New Aura",
+    url: "",
+    x: 1,
+    y: 1,
+    width: 1,
+    height: 1
+});
+const tokenList = new DataList({
+    name: "New Token",
+    url: "",
+    x: 1,
+    y: 1,
+    width: 1,
+    height: 1
+});
 
 let name = "";
 let mapURL = "";
@@ -233,17 +254,17 @@ function load(data)
 
     for (const terrainFeature of data.terrainFeatures)
     {
-        terrainList.add(terrainFeature.name, terrainFeature.url, terrainFeature.x, terrainFeature.y, terrainFeature.width, terrainFeature.height);
+        terrainList.add(terrainFeature);
     }
 
     for (const aura of data.auras)
     {
-        auraList.add(aura.name, aura.url, aura.x, aura.y, aura.width, aura.height);
+        auraList.add(aura);
     }
 
     for (const token of data.tokens)
     {
-        tokenList.add(token.name, token.url, token.x, token.y, token.width, token.height);
+        tokenList.add(token);
     }
 }
 

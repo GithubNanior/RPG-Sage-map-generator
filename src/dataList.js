@@ -2,8 +2,9 @@ import { Event } from "./event";
 
 class DataList
 {
-    constructor()
+    constructor(defaults = {})
     {
+        this.defaults = defaults;
         this.emptyIndices = [];
         this.listElements = [];
         this.onAdd = new Event();
@@ -11,31 +12,23 @@ class DataList
         this.onRemove = new Event();
     }
 
-    add(name = "Element", url = "", x = 1, y = 1, width = 1, height = 1)
+    add(data)
     {
-        const id = this.emptyIndices.pop() ?? this.listElements.length;
-        const element = {
-          id,
-          name,
-          url,
-          x,
-          y,
-          width,
-          height  
-        };
+        const element = Object.assign({}, this.defaults, data);
+        element.id = this.emptyIndices.pop() ?? this.listElements.length;
 
-        this.listElements[id] = element;
+        this.listElements[element.id] = element;
         this.onAdd.invoke(element);
         return element;
     }
 
     set(id, values)
     {
-        const data = this.listElements[id];
-        if (data != undefined)
+        const element = this.listElements[id];
+        if (element)
         {
-            Object.assign(data, values);
-            this.onModify.invoke(data);
+            Object.assign(element, values);
+            this.onModify.invoke(element);
         }
         
     }
@@ -43,7 +36,7 @@ class DataList
     remove(id)
     {
         const element = this.listElements[id];
-        if (element != undefined)
+        if (element)
         {
             this.listElements[id] = undefined;
             this.emptyIndices.push(id);

@@ -25,8 +25,7 @@ class ElementList
             }
         });
         element.querySelector("[name=\"duplicate\"]").addEventListener("click", () => {
-            const {name, url, x, y, width, height} = this.dataList.listElements[data.id];
-            this.dataList.add(name, url, x, y, width, height);
+            this.dataList.add(this.dataList.listElements[data.id]);
         });
         element.querySelector("[name=\"delete\"]").addEventListener("click", () => {
             this.dataList.remove(data.id);
