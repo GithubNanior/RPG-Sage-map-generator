@@ -84,7 +84,7 @@ document.querySelector("#save").addEventListener("click", () => {
     }
     else
     {
-        Save.save(Data.mapName, serializeData());
+        Save.save(Data.mapName, Data.serializeData());
     }
 });
 
