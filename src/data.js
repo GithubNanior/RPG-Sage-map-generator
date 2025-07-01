@@ -1,3 +1,4 @@
+import { isNullOrWhitespace, dequote } from "./utils";
 import { Event } from "./event";
 import { DataList } from "./dataList";
 
@@ -53,6 +54,199 @@ function serializeData()
     ].join("\n");
 }
 
+const sectionsTypes = [
+    {
+        test: /^\s*\[map\]\s*$/i,
+        use: deserializeMap,
+        category: ""
+    },
+    {
+        test: /^\s*\[terrain\]\s*$/i,
+        use: deserializeTerrain,
+        category: "terrainFeatures"
+    },
+    {
+        test: /^\s*\[aura\]\s*$/i,
+        use: deserializeAura,
+        category: "auras"
+    },
+    {
+        test: /^\s*\[token\]\s*$/i,
+        use: deserializeToken,
+        category: "tokens"
+    }
+];
+
+/** 
+ * Match a line and cleans it up for use, returns undefined if invalid.
+ * @param {boolean} keepMatch - Whether or not to keep the part matching regex.
+ * @param {number} valueCount - If above 0, interpret the value as a vector and split it by x & commas, returning them as an array of numbers with a length of valueCount.
+ */
+function matchLine(lines, regex, keepMatch = false, valueCount = 0)
+{
+    let line = lines.find((val) => regex.test(val));
+
+	if (!line) return undefined;
+
+    if (!keepMatch)
+    {
+        line = line.replace(regex, "");
+    }
+    line = dequote(line).trim();
+
+    if (valueCount > 0)
+    {
+        const values = line.split(/[x,]/).map((val) => +val.trim());
+        if (values.length != valueCount || values.find((val) => isNaN(val)))
+        {
+            return undefined;
+        }
+        return values;
+    }
+    return line;
+}
+
+function assignOutput(data, output, category)
+{
+    if (category)
+    {
+        data[category].push(output);
+    }
+    else
+    {
+        Object.assign(data, output);
+    }
+}
+
+// Yes I'm fully aware that this way would pick the last map instead of the first, though I just wanna try suggest writing something like this?
+// If not... Well, it's mostly a matter of copying the bot's code and modifying it to output in this format.
+function deserializeData(serializedData)
+{
+    const data = {
+        terrainFeatures: [],
+        auras: [],
+        tokens: []
+    };
+
+    const lines = serializedData.split(/\r?\n\r?/).filter((value) => !isNullOrWhitespace(value));
+    let chunkType = undefined;
+    let chunkStart = 0;
+    for (let i = 0; i < lines.length; i++)
+    {
+        const newType = sectionsTypes.find((type) => type.test.test(lines[i]));
+        
+        if (newType)
+        {
+            if (chunkType)
+            {
+                assignOutput(data, chunkType?.use(lines.slice(chunkStart, i)), chunkType.category);
+            }
+            chunkStart = i+1;
+            chunkType = newType;
+        }
+    }
+
+    if (chunkType)
+    {
+        assignOutput(data, chunkType?.use(lines.slice(chunkStart, lines.length)), chunkType.category);
+    }
+    return data;
+}
+
+function deserializeMap(lines)
+{
+    const [gridColumns, gridRows] = matchLine(lines, /^grid=/i, false, 2) ?? Array(2);
+    const [spawnX, spawnY] = matchLine(lines, /^spawn=/i, false, 2) ?? Array(2);
+
+    return {
+        name: matchLine(lines, /^name=/i),
+        mapURL: matchLine(lines, /^url=/i) ?? matchLine(lines, /^https?\:\/\//i, true),
+        gridColumns, gridRows,
+        spawnX, spawnY
+    };
+}
+
+function deserializeTerrain(lines)
+{
+    const [x, y] = matchLine(lines, /^pos(ition)?=/i, false, 2)
+        ?? [+matchLine(lines, /^col=/i), +matchLine(lines, /^row=/i)]
+        ?? Array(2);
+    
+    const [width, height] = matchLine(lines, /^size=/i, false, 2)
+		?? [+matchLine(lines, /^cols=/i), +matchLine(lines, /^rows=/i)]
+        ?? Array(2);
+
+    return {
+        name: matchLine(lines, /^name=/i),
+        url: matchLine(lines, /^url=/i) ?? matchLine(lines, /^https?\:\/\//i, true),
+        x, y,
+        width, height
+    };
+}
+
+function deserializeAura(lines)
+{
+    const [x, y] = matchLine(lines, /^pos(ition)?=/i, false, 2)
+        ?? [+matchLine(lines, /^col=/i), +matchLine(lines, /^row=/i)]
+        ?? Array(2);
+    
+    const [width, height] = matchLine(lines, /^size=/i, false, 2)
+		?? [+matchLine(lines, /^cols=/i), +matchLine(lines, /^rows=/i)]
+        ?? Array(2);
+
+    return {
+        name: matchLine(lines, /^name=/i),
+        url: matchLine(lines, /^url=/i) ?? matchLine(lines, /^https?\:\/\//i, true),
+        x, y,
+        width, height
+    };
+}
+
+function deserializeToken(lines)
+{
+    const [x, y] = matchLine(lines, /^pos(ition)?=/i, false, 2)
+        ?? [+matchLine(lines, /^col=/i), +matchLine(lines, /^row=/i)]
+        ?? Array(2);
+    
+    const [width, height] = matchLine(lines, /^size=/i, false, 2)
+		?? [+matchLine(lines, /^cols=/i), +matchLine(lines, /^rows=/i)]
+        ?? Array(2);
+
+    return {
+        name: matchLine(lines, /^name=/i),
+        url: matchLine(lines, /^url=/i) ?? matchLine(lines, /^https?\:\/\//i, true),
+        x, y,
+        width, height
+    };
+}
+
+function load(data)
+{
+    terrainList.clear();
+    auraList.clear();
+    tokenList.clear();
+
+    setName(data.name);
+    setMapURL(data.mapURL);
+    setGrid(data.gridColumns, data.gridRows);
+    setSpawn(data.spawnX, data.spawnY);
+
+    for (const terrainFeature of data.terrainFeatures)
+    {
+        terrainList.add(terrainFeature.name, terrainFeature.url, terrainFeature.x, terrainFeature.y, terrainFeature.width, terrainFeature.height);
+    }
+
+    for (const aura of data.auras)
+    {
+        auraList.add(aura.name, aura.url, aura.x, aura.y, aura.width, aura.height);
+    }
+
+    for (const token of data.tokens)
+    {
+        tokenList.add(token.name, token.url, token.x, token.y, token.width, token.height);
+    }
+}
+
 function serializeMap()
 {
     return `[map]
@@ -106,5 +300,7 @@ export {
     terrainList,
     auraList,
     tokenList,
-    serializeData
+    serializeData,
+    deserializeData,
+    load
 };

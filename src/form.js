@@ -63,6 +63,11 @@ document.querySelector("#output-generate").addEventListener("click", (event) => 
     event.preventDefault();
 });
 
+document.querySelector("#output-load").addEventListener("click", (event) => {
+    Data.load(Data.deserializeData(outputArea.value));
+    event.preventDefault();
+});
+
 document.querySelector("#output-download").addEventListener("click", (event) => {
     downloadTXT(Data.mapName.replaceAll(" ", "_"), Data.serializeData())
     event.preventDefault();
@@ -140,6 +145,18 @@ function createLoadOption(name)
 
     const loadButton = loadOption.querySelector("button[name='load']");
     loadButton.innerText = name;
+    loadButton.addEventListener("click", () => {
+        const data = Data.deserializeData(Save.getValue(name));
+
+        if (data)
+        {
+            Data.load(data);
+        }
+        else
+        {
+            LogError(`No local save by the name of ${name}!`)
+        }
+    });
 
     const deleteButton = loadOption.querySelector("button[name='delete']")
     deleteButton.addEventListener("click", () => {
