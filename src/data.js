@@ -75,6 +75,46 @@ function serializeData()
     ].join("\n");
 }
 
+function serializeMap()
+{
+    return `[map]
+${mapURL}
+name=${name}
+grid=${gridColumns}x${gridRows}
+spawn=${spawnX},${spawnY}
+`;
+}
+
+function serializeTerrain(token)
+{
+    return `[terrain]
+${token.url}
+name=${token.name}
+size=${token.width}x${token.height}
+position=${token.x},${token.y}
+`;
+}
+
+function serializeAura(aura)
+{
+    return `[aura]
+${aura.url}
+name=${aura.name}
+size=${aura.width}x${aura.height}
+position=${aura.x},${aura.y}
+`;
+}
+
+function serializeToken(token)
+{
+    return `[token]
+${token.url}
+name=${token.name}
+size=${token.width}x${token.height}
+position=${token.x},${token.y}
+`;
+}
+
 const sectionsTypes = [
     {
         test: /^\s*\[map\]\s*$/i,
@@ -266,46 +306,6 @@ function load(data)
     {
         tokenList.add(token);
     }
-}
-
-function serializeMap()
-{
-    return `[map]
-${mapURL}
-name=${name}
-grid=${gridColumns}x${gridRows}
-spawn=${spawnX},${spawnY}
-`;
-}
-
-function serializeTerrain(token)
-{
-    return `[terrain]
-${token.url}
-name=${token.name}
-size=${token.width}x${token.height}
-position=${token.x},${token.y}
-`;
-}
-
-function serializeAura(aura)
-{
-    return `[aura]
-${aura.url}
-name=${aura.name}
-size=${aura.width}x${aura.height}
-position=${aura.x},${aura.y}
-`;
-}
-
-function serializeToken(token)
-{
-    return `[token]
-${token.url}
-name=${token.name}
-size=${token.width}x${token.height}
-position=${token.x},${token.y}
-`;
 }
 
 export {

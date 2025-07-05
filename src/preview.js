@@ -1,6 +1,5 @@
 import Konva from "konva";
 import SpawnIcon from "./images/spawn.svg";
-import * as Form from "./form";
 import * as Data from "./data";
 
 const container = document.querySelector("#preview");

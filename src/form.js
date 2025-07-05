@@ -45,32 +45,26 @@ spawnYField.addEventListener("change", () => {
 
 document.querySelector("#terrain-add").addEventListener("click", (event) => {
     Data.terrainList.add();
-    event.preventDefault();
 });
 
 document.querySelector("#aura-add").addEventListener("click", (event) => {
     Data.auraList.add();
-    event.preventDefault();
 });
 
 document.querySelector("#token-add").addEventListener("click", (event) => {
     Data.tokenList.add();
-    event.preventDefault();
 });
 
 document.querySelector("#output-generate").addEventListener("click", (event) => {
     outputArea.value = Data.serializeData();
-    event.preventDefault();
 });
 
 document.querySelector("#output-load").addEventListener("click", (event) => {
     Data.load(Data.deserializeData(outputArea.value));
-    event.preventDefault();
 });
 
 document.querySelector("#output-download").addEventListener("click", (event) => {
-    downloadTXT(Data.mapName.replaceAll(" ", "_"), Data.serializeData())
-    event.preventDefault();
+    downloadTXT(Data.mapName.replaceAll(" ", "_"), Data.serializeData());
 });
 
 document.querySelector("#save").addEventListener("click", () => {
@@ -105,6 +99,34 @@ loadTab.addEventListener("pointerleave", () => {
     dropdownOpen = false;
 });
 
+function createLoadOption(name)
+{
+    const loadOption = parseHtml(loadOptionHTML);
+
+    const loadButton = loadOption.querySelector("button[name='load']");
+    loadButton.innerText = name;
+    loadButton.addEventListener("click", () => {
+        const data = Data.deserializeData(Save.getValue(name));
+
+        if (data)
+        {
+            Data.load(data);
+        }
+        else
+        {
+            LogError(`No local save by the name of ${name}!`);
+        }
+    });
+
+    const deleteButton = loadOption.querySelector("button[name='delete']")
+    deleteButton.addEventListener("click", () => {
+        Save.deleteSave(name);
+        loadOption.remove();
+    });
+
+    return loadOption;
+}
+
 function link()
 {
     terrainList.bindDataList(Data.terrainList);
@@ -137,34 +159,6 @@ function link()
     Data.tokenList.onAdd.subscribe((data) => tokenList.add(data));
     Data.tokenList.onModify.subscribe((data) => tokenList.update(data));
     Data.tokenList.onRemove.subscribe((id) => tokenList.remove(id));
-}
-
-function createLoadOption(name)
-{
-    const loadOption = parseHtml(loadOptionHTML);
-
-    const loadButton = loadOption.querySelector("button[name='load']");
-    loadButton.innerText = name;
-    loadButton.addEventListener("click", () => {
-        const data = Data.deserializeData(Save.getValue(name));
-
-        if (data)
-        {
-            Data.load(data);
-        }
-        else
-        {
-            LogError(`No local save by the name of ${name}!`)
-        }
-    });
-
-    const deleteButton = loadOption.querySelector("button[name='delete']")
-    deleteButton.addEventListener("click", () => {
-        Save.deleteSave(name);
-        loadOption.remove();
-    });
-
-    return loadOption;
 }
 
 function start()
