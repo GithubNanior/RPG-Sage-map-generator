@@ -3,11 +3,14 @@ import * as Save from "./save";
 import { LogError } from "./logger";
 import { parseHtml, downloadTXT, isNullOrWhitespace } from "./utils";
 import { ElementList } from "./elementList";
+import editTerrainFeatureHTML from "./editForm-TerrainFeature.html";
+import editAuraHTML from "./editForm-Aura.html";
+import editTokenHTML from "./editForm-Token.html";
 import loadOptionHTML from "./loadOption.html";
 
-const terrainList = new ElementList(document.querySelector("#terrain-list"));
-const auraList = new ElementList(document.querySelector("#aura-list"));
-const tokenList = new ElementList(document.querySelector("#token-list"));
+const terrainList = new ElementList(document.querySelector("#terrain-list"), editTerrainFeatureHTML);
+const auraList = new ElementList(document.querySelector("#aura-list"), editAuraHTML);
+const tokenList = new ElementList(document.querySelector("#token-list"), editTokenHTML);
 
 //Fetching fields
 const nameField = document.querySelector("#name-field");

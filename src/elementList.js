@@ -1,10 +1,9 @@
-import editFormHTML from "./editForm.html";
 import listElementHTML from "./listElement.html";
 import { parseHtml } from "./utils";
 
 class ElementList
 {
-    constructor(listContainer)
+    constructor(listContainer, editFormHTML)
     {
         this.listContainer = listContainer;
         this.listElements = [];
