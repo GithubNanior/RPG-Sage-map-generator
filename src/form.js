@@ -11,6 +11,7 @@ import loadOptionHTML from "./loadOption.html";
 
 const terrainList = new ElementList(document.querySelector("#terrain-list"), editTerrainFeatureHTML);
 const auraList = new ElementList(document.querySelector("#aura-list"), editAuraHTML);
+/** @type { ElementList } */
 const tokenList = new ElementList(document.querySelector("#token-list"), editTokenHTML);
 
 //Fetching fields
@@ -201,9 +202,9 @@ function link()
     Data.onMapSet.subscribe((url) => {
         mapURLField.value = url;
     });
-    Data.onGridSet.subscribe((rows, columns) => {
-        gridRowsField.value = rows;
+    Data.onGridSet.subscribe((columns, rows) => {
         gridColumnsField.value = columns;
+        gridRowsField.value = rows;
     });
     Data.onSpawnSet.subscribe((x, y) => {
         spawnXField.value = x;
