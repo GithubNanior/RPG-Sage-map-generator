@@ -2,6 +2,7 @@ import * as Data from "./data";
 import * as Save from "./save";
 import { LogError } from "./logger";
 import { parseHtml, downloadTXT, isNullOrWhitespace } from "./utils";
+import { getAnchorTag } from "./anchorUtils";
 import { ElementList } from "./elementList";
 import editTerrainFeatureHTML from "./editForm-TerrainFeature.html";
 import editAuraHTML from "./editForm-Aura.html";
@@ -19,6 +20,9 @@ const gridColumnsField = document.querySelector("#grid-columns-field");
 const gridRowsField = document.querySelector("#grid-rows-field");
 const spawnXField = document.querySelector("#spawn-x-field");
 const spawnYField = document.querySelector("#spawn-y-field");
+
+/** @type HTMLSelectElement */
+const auraAnchorField = auraList.editForm.querySelector("#aura-anchor-field");
 
 const outputArea = document.querySelector("#output-area");
 const loadTab = document.querySelector("#load");
@@ -102,6 +106,14 @@ loadTab.addEventListener("pointerleave", () => {
     dropdownOpen = false;
 });
 
+function createOptionElement(name)
+{
+    const option = document.createElement("option");
+    option.setAttribute("value", isNullOrWhitespace(name) ? "None" : name);
+    option.innerText = name;
+    return option;
+}
+
 function createLoadOption(name)
 {
     const loadOption = parseHtml(loadOptionHTML);
@@ -130,6 +142,53 @@ function createLoadOption(name)
     return loadOption;
 }
 
+/**
+ * @param { ("token" | "terrain") } type
+ * @param { Number } id 
+ */
+function clearAnchors(type, id)
+{
+    const anchorTag = getAnchorTag(type, id);
+    for (let i = 0; i < auraList.dataList.listElements.length; i++)
+    {
+        if (auraList.dataList.listElements[i]?.anchor == anchorTag)
+        {
+            auraList.dataList.set(i, { anchor: "" });
+        }
+    }
+}
+
+function updateAnchorField()
+{
+    const originalValue = auraAnchorField.value;
+    auraAnchorField.innerHTML = "";
+
+    auraAnchorField.appendChild(createOptionElement("None"));
+
+    for (let i = 0; i < terrainList.dataList.listElements.length; i++)
+    {
+        if (terrainList.dataList.listElements[i])
+        {
+            const option = document.createElement("option");
+            option.setAttribute("value", "terrain " + i);
+            option.innerText = terrainList.dataList.listElements[i].name;
+            auraAnchorField.appendChild(option);
+        }
+    }
+    for (let i = 0; i < tokenList.dataList.listElements.length; i++)
+    {
+        if (tokenList.dataList.listElements[i])
+        {
+            const option = document.createElement("option");
+            option.setAttribute("value", "token " + i);
+            option.innerText = tokenList.dataList.listElements[i].name;
+            auraAnchorField.appendChild(option);
+        }
+    }
+
+    auraAnchorField.selectedIndex = Math.max(0, Array.from(auraAnchorField.children).findIndex((option) => option.value == originalValue));
+}
+
 function link()
 {
     terrainList.bindDataList(Data.terrainList);
@@ -150,6 +209,18 @@ function link()
         spawnXField.value = x;
         spawnYField.value = y;
     });
+
+    // Refresh anchor selection if edit form is opened or modified
+    auraList.onUpdateEdit.subscribe((data) => {
+        auraAnchorField.value = data.anchor;
+        updateAnchorField();
+    });
+    tokenList.dataList.onAdd.subscribe(() => updateAnchorField());
+    tokenList.dataList.onModify.subscribe(() => updateAnchorField());
+    tokenList.dataList.onRemove.subscribe((id) => clearAnchors("token", id));
+    terrainList.dataList.onAdd.subscribe(() => updateAnchorField());
+    terrainList.dataList.onModify.subscribe(() => updateAnchorField());
+    terrainList.dataList.onRemove.subscribe((id) => clearAnchors("terrain", id));
 }
 
 function start()

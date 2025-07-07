@@ -1,6 +1,7 @@
 import { isNullOrWhitespace, dequote } from "./utils";
 import { Event } from "./event";
 import { DataList } from "./dataList";
+import { anchorTagToName, anchorNameToTag } from "./anchorUtils";
 
 const terrainList = new DataList({
     name: "New TerrainFeature",
@@ -12,6 +13,8 @@ const terrainList = new DataList({
 });
 const auraList = new DataList({
     name: "New Aura",
+    anchor: "",
+    opacity: 0.5,
     url: "",
     x: 1,
     y: 1,
@@ -24,7 +27,8 @@ const tokenList = new DataList({
     x: 1,
     y: 1,
     width: 1,
-    height: 1
+    height: 1,
+    user: ""
 });
 
 let name = "";
@@ -100,6 +104,8 @@ function serializeAura(aura)
     return `[aura]
 url=${aura.url}
 name=${aura.name}
+anchor=${anchorTagToName(aura.anchor)}
+opacity=${aura.opacity}
 size=${aura.width}x${aura.height}
 position=${aura.x},${aura.y}
 `;
@@ -112,14 +118,16 @@ url=${token.url}
 name=${token.name}
 size=${token.width}x${token.height}
 position=${token.x},${token.y}
+user=${token.user}
 `;
 }
 
-const sectionsTypes = [
+const chunkTypes = [
     {
         test: /^\s*\[map\]\s*$/i,
         use: deserializeMap,
-        category: ""
+        category: "map",
+        unique: true
     },
     {
         test: /^\s*\[terrain\]\s*$/i,
@@ -127,15 +135,15 @@ const sectionsTypes = [
         category: "terrainFeatures"
     },
     {
+        test: /^\s*\[token\]\s*$/i,
+        use: deserializeToken,
+        category: "tokens"
+    },
+    {
         test: /^\s*\[aura\]\s*$/i,
         use: deserializeAura,
         category: "auras"
     },
-    {
-        test: /^\s*\[token\]\s*$/i,
-        use: deserializeToken,
-        category: "tokens"
-    }
 ];
 
 /** 
@@ -167,50 +175,54 @@ function matchLine(lines, regex, keepMatch = false, valueCount = 0)
     return line;
 }
 
-function assignOutput(data, output, category)
-{
-    if (category)
-    {
-        data[category].push(output);
-    }
-    else
-    {
-        Object.assign(data, output);
-    }
-}
-
-// Yes I'm fully aware that this way would pick the last map instead of the first, though I just wanna try suggest writing something like this?
-// If not... Well, it's mostly a matter of copying the bot's code and modifying it to output in this format.
 function deserializeData(serializedData)
 {
-    const data = {
-        terrainFeatures: [],
-        auras: [],
-        tokens: []
-    };
-
+    const chunks = Array.apply(null, new Array(chunkTypes.length)).map(() => []);
+    //#region Divide chunks
     const lines = serializedData.split(/\r?\n\r?/).filter((value) => !isNullOrWhitespace(value));
-    let chunkType = undefined;
+
+    let typeIndex = -1;
     let chunkStart = 0;
     for (let i = 0; i < lines.length; i++)
     {
-        const newType = sectionsTypes.find((type) => type.test.test(lines[i]));
+        const newTypeIndex = chunkTypes.findIndex((type) => type.test.test(lines[i]));
         
-        if (newType)
+        if (newTypeIndex != -1)
         {
-            if (chunkType)
+            if (typeIndex != -1)
             {
-                assignOutput(data, chunkType?.use(lines.slice(chunkStart, i)), chunkType.category);
+                chunks[typeIndex].push(lines.slice(chunkStart, i));
             }
-            chunkStart = i+1;
-            chunkType = newType;
+            chunkStart = i + 1;
+            typeIndex = newTypeIndex;
         }
     }
 
-    if (chunkType)
+    if (typeIndex != -1)
     {
-        assignOutput(data, chunkType?.use(lines.slice(chunkStart, lines.length)), chunkType.category);
+        chunks[typeIndex].push(lines.slice(chunkStart, lines.length));
     }
+    //#endregion
+
+    const data = {};
+    //#region Deserialize chunks
+    for (let i = 0; i < chunkTypes.length; i++) {
+        const chunkType = chunkTypes[i];
+        if (!chunkType.unique)
+        {
+            data[chunkType.category] = [];
+            for (let j = 0; j < chunks[i].length; j++)
+            {
+                data[chunkType.category].push(chunkType.use(chunks[i][j]));
+            }
+        }
+        else if (chunks[i])
+        {
+            data[chunkType.category] = chunkType.use(chunks[i][0]);
+        }
+    }
+    //#endregion
+    
     return data;
 }
 
@@ -255,9 +267,12 @@ function deserializeAura(lines)
 		?? [+matchLine(lines, /^cols=/i), +matchLine(lines, /^rows=/i)]
         ?? Array(2);
 
+    const anchorName = matchLine(lines, /^anchor=/i);
+
     return {
         name: matchLine(lines, /^name=/i),
         url: matchLine(lines, /^url=/i) ?? matchLine(lines, /^https?\:\/\//i, true),
+        anchor: anchorName ? anchorNameToTag(anchorName) : "",
         x, y,
         width, height
     };
@@ -276,6 +291,7 @@ function deserializeToken(lines)
     return {
         name: matchLine(lines, /^name=/i),
         url: matchLine(lines, /^url=/i) ?? matchLine(lines, /^https?\:\/\//i, true),
+        user: matchLine(lines, /^user=/i),
         x, y,
         width, height
     };
@@ -287,10 +303,11 @@ function load(data)
     auraList.clear();
     tokenList.clear();
 
-    setName(data.name);
-    setMapURL(data.mapURL);
-    setGrid(data.gridColumns, data.gridRows);
-    setSpawn(data.spawnX, data.spawnY);
+    const map = data.map;
+    setName(map.name);
+    setMapURL(map.mapURL);
+    setGrid(map.gridColumns, map.gridRows);
+    setSpawn(map.spawnX, map.spawnY);
 
     for (const terrainFeature of data.terrainFeatures)
     {
