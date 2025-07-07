@@ -1,5 +1,6 @@
 import listElementHTML from "./listElement.html";
 import { parseHtml } from "./utils";
+import { Event } from "./event";
 
 class ElementList
 {
@@ -8,6 +9,7 @@ class ElementList
         this.listContainer = listContainer;
         this.listElements = [];
         this.editForm = parseHtml(editFormHTML);
+        this.onUpdateEdit = new Event();
     }
 
     add(data)
@@ -102,6 +104,8 @@ class ElementList
                 });
             };
         }
+
+        this.onUpdateEdit.invoke(data);
     }
 
     bindDataList(dataList)
