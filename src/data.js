@@ -78,7 +78,7 @@ function serializeData()
 function serializeMap()
 {
     return `[map]
-${mapURL}
+url=${mapURL}
 name=${name}
 grid=${gridColumns}x${gridRows}
 spawn=${spawnX},${spawnY}
@@ -88,7 +88,7 @@ spawn=${spawnX},${spawnY}
 function serializeTerrain(token)
 {
     return `[terrain]
-${token.url}
+url=${token.url}
 name=${token.name}
 size=${token.width}x${token.height}
 position=${token.x},${token.y}
@@ -98,7 +98,7 @@ position=${token.x},${token.y}
 function serializeAura(aura)
 {
     return `[aura]
-${aura.url}
+url=${aura.url}
 name=${aura.name}
 size=${aura.width}x${aura.height}
 position=${aura.x},${aura.y}
@@ -108,7 +108,7 @@ position=${aura.x},${aura.y}
 function serializeToken(token)
 {
     return `[token]
-${token.url}
+url=${token.url}
 name=${token.name}
 size=${token.width}x${token.height}
 position=${token.x},${token.y}
