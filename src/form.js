@@ -150,18 +150,6 @@ function link()
         spawnXField.value = x;
         spawnYField.value = y;
     });
-
-    Data.terrainList.onAdd.subscribe((data) => terrainList.add(data));
-    Data.terrainList.onModify.subscribe((data) => terrainList.update(data));
-    Data.terrainList.onRemove.subscribe((id) => terrainList.remove(id));
-    
-    Data.auraList.onAdd.subscribe((data) => auraList.add(data));
-    Data.auraList.onModify.subscribe((data) => auraList.update(data));
-    Data.auraList.onRemove.subscribe((id) => auraList.remove(id));
-
-    Data.tokenList.onAdd.subscribe((data) => tokenList.add(data));
-    Data.tokenList.onModify.subscribe((data) => tokenList.update(data));
-    Data.tokenList.onRemove.subscribe((id) => tokenList.remove(id));
 }
 
 function start()

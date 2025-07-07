@@ -107,6 +107,9 @@ class ElementList
     bindDataList(dataList)
     {
         this.dataList = dataList;
+        this.dataList.onAdd.subscribe((data) => this.add(data));
+        this.dataList.onModify.subscribe((data) => this.update(data));
+        this.dataList.onRemove.subscribe((id) => this.remove(id));
     }
 }
 
