@@ -81,13 +81,24 @@ class ElementList
     updateEdit(data)
     {
         const element = this.listElements[data.id];
-        const fields = element.querySelectorAll("input");
-        for (const field of fields)
+        const inputs = element.querySelectorAll("input");
+        for (const input of inputs)
         {
-            field.value = data[field.name];
-            field.onchange = () => {
+            input.value = data[input.name];
+            input.onchange = () => {
                 this.dataList.set(data.id, {
-                    [field.name]: field.value
+                    [input.name]: input.value
+                });
+            };
+        }
+
+        const selects = element.querySelectorAll("select");
+        for (const select of selects)
+        {
+            select.value = data[select.name];
+            select.onchange = () => {
+                this.dataList.set(data.id, {
+                    [select.name]: select.value
                 });
             };
         }
