@@ -19,7 +19,6 @@ class DataList
 
         this.listElements[element.id] = element;
         this.onAdd.invoke(element);
-        return element;
     }
 
     set(id, values)
@@ -27,10 +26,9 @@ class DataList
         const element = this.listElements[id];
         if (element)
         {
-            Object.assign(element, values);
-            this.onModify.invoke(element);
+            this.listElements[id] = Object.assign({}, element, values);
+            this.onModify.invoke(element, this.listElements[id]);
         }
-        
     }
 
     remove(id)
@@ -40,10 +38,8 @@ class DataList
         {
             this.listElements[id] = undefined;
             this.emptyIndices.push(id);
-            this.onRemove.invoke(id);
+            this.onRemove.invoke(element);
         }
-
-        return element;
     }
 
     clear()

@@ -216,12 +216,12 @@ function link()
         auraAnchorField.value = data.anchor;
         updateAnchorField();
     });
-    tokenList.dataList.onAdd.subscribe(() => updateAnchorField());
-    tokenList.dataList.onModify.subscribe(() => updateAnchorField());
-    tokenList.dataList.onRemove.subscribe((id) => clearAnchors("token", id));
-    terrainList.dataList.onAdd.subscribe(() => updateAnchorField());
-    terrainList.dataList.onModify.subscribe(() => updateAnchorField());
-    terrainList.dataList.onRemove.subscribe((id) => clearAnchors("terrain", id));
+    tokenList.dataList.onAdd.subscribe((data) => updateAnchorField());
+    tokenList.dataList.onModify.subscribe((oldData, newData) => updateAnchorField());
+    tokenList.dataList.onRemove.subscribe((data) => clearAnchors("token", id));
+    terrainList.dataList.onAdd.subscribe((data) => updateAnchorField());
+    terrainList.dataList.onModify.subscribe((oldData, newData) => updateAnchorField());
+    terrainList.dataList.onRemove.subscribe((data) => clearAnchors("terrain", id));
 }
 
 function start()

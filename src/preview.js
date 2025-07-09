@@ -258,16 +258,16 @@ function link()
     Data.onSpawnSet.subscribe((x, y) => setSpawn(x, y));
 
     Data.terrainList.onAdd.subscribe((data) => showToken(terrainLayer, terrainFeatures, Data.terrainList, data));
-    Data.terrainList.onModify.subscribe((data) => showToken(terrainLayer, terrainFeatures, Data.terrainList, data));
-    Data.terrainList.onRemove.subscribe((id) => hideToken(terrainLayer, terrainFeatures, id));
+    Data.terrainList.onModify.subscribe((oldData, newData) => showToken(terrainLayer, terrainFeatures, Data.terrainList, newData));
+    Data.terrainList.onRemove.subscribe((data) => hideToken(terrainLayer, terrainFeatures, data.id));
 
     Data.auraList.onAdd.subscribe((data) => showToken(auraLayer, auras, Data.auraList, data));
-    Data.auraList.onModify.subscribe((data) => showToken(auraLayer, auras, Data.auraList, data));
-    Data.auraList.onRemove.subscribe((id) => hideToken(auraLayer, auras, id));
+    Data.auraList.onModify.subscribe((oldData, newData) => showToken(auraLayer, auras, Data.auraList, newData));
+    Data.auraList.onRemove.subscribe((data) => hideToken(auraLayer, auras, data.id));
 
     Data.tokenList.onAdd.subscribe((data) => showToken(tokenLayer, tokens, Data.tokenList, data));
-    Data.tokenList.onModify.subscribe((data) => showToken(tokenLayer, tokens, Data.tokenList, data));
-    Data.tokenList.onRemove.subscribe((id) => hideToken(tokenLayer, tokens, id));
+    Data.tokenList.onModify.subscribe((oldData, newData) => showToken(tokenLayer, tokens, Data.tokenList, newData));
+    Data.tokenList.onRemove.subscribe((data) => hideToken(tokenLayer, tokens, data.id));
 }
 
 window.addEventListener("resize", (event) => resizePreview());

@@ -112,8 +112,8 @@ class ElementList
     {
         this.dataList = dataList;
         this.dataList.onAdd.subscribe((data) => this.add(data));
-        this.dataList.onModify.subscribe((data) => this.update(data));
-        this.dataList.onRemove.subscribe((id) => this.remove(id));
+        this.dataList.onModify.subscribe((oldData, newData) => this.update(newData));
+        this.dataList.onRemove.subscribe((data) => this.remove(data.id));
     }
 }
 
