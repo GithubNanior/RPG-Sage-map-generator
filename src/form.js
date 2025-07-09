@@ -2,7 +2,6 @@ import * as Data from "./data";
 import * as Save from "./save";
 import { LogError } from "./logger";
 import { parseHtml, downloadTXT, isNullOrWhitespace } from "./utils";
-import { getAnchorTag } from "./anchorUtils";
 import { ElementList } from "./elementList";
 import editTerrainFeatureHTML from "./editForm-TerrainFeature.html";
 import editAuraHTML from "./editForm-Aura.html";
@@ -107,11 +106,11 @@ loadTab.addEventListener("pointerleave", () => {
     dropdownOpen = false;
 });
 
-function createOptionElement(name)
+function createOptionElement(value)
 {
     const option = document.createElement("option");
-    option.setAttribute("value", isNullOrWhitespace(name) ? "None" : name);
-    option.innerText = name;
+    option.setAttribute("value", value);
+    option.innerText = isNullOrWhitespace(value) ? "None" : value;
     return option;
 }
 
@@ -143,25 +142,22 @@ function createLoadOption(name)
     return loadOption;
 }
 
-/**
- * @param { ("token" | "terrain") } type
- * @param { Number } id 
- */
-function clearAnchors(type, id)
+function onAnchorRename(oldName, newName)
 {
-    const anchorTag = getAnchorTag(type, id);
+    if (oldName === newName) return;
+
     for (let i = 0; i < auraList.dataList.listElements.length; i++)
     {
-        if (auraList.dataList.listElements[i]?.anchor == anchorTag)
+        if (auraList.dataList.listElements[i]?.anchor === oldName)
         {
-            auraList.dataList.set(i, { anchor: "" });
+            auraList.dataList.set(i, { anchor: newName });
         }
     }
 }
 
-function updateAnchorField()
+function updateAnchorField(newAnchor = undefined)
 {
-    const originalValue = auraAnchorField.value;
+    const originalValue = newAnchor === undefined ? auraAnchorField.value : newAnchor;
     auraAnchorField.innerHTML = "";
 
     auraAnchorField.appendChild(createOptionElement("None"));
@@ -170,20 +166,14 @@ function updateAnchorField()
     {
         if (terrainList.dataList.listElements[i])
         {
-            const option = document.createElement("option");
-            option.setAttribute("value", "terrain " + i);
-            option.innerText = terrainList.dataList.listElements[i].name;
-            auraAnchorField.appendChild(option);
+            auraAnchorField.appendChild(createOptionElement(terrainList.dataList.listElements[i].name));
         }
     }
     for (let i = 0; i < tokenList.dataList.listElements.length; i++)
     {
         if (tokenList.dataList.listElements[i])
         {
-            const option = document.createElement("option");
-            option.setAttribute("value", "token " + i);
-            option.innerText = tokenList.dataList.listElements[i].name;
-            auraAnchorField.appendChild(option);
+            auraAnchorField.appendChild(createOptionElement(tokenList.dataList.listElements[i].name));
         }
     }
 
@@ -212,16 +202,13 @@ function link()
     });
 
     // Refresh anchor selection if edit form is opened or modified
-    auraList.onUpdateEdit.subscribe((data) => {
-        auraAnchorField.value = data.anchor;
-        updateAnchorField();
-    });
+    auraList.onUpdateEdit.subscribe((data) => updateAnchorField(data.anchor));
     tokenList.dataList.onAdd.subscribe((data) => updateAnchorField());
-    tokenList.dataList.onModify.subscribe((oldData, newData) => updateAnchorField());
-    tokenList.dataList.onRemove.subscribe((data) => clearAnchors("token", id));
+    tokenList.dataList.onModify.subscribe((oldData, newData) => onAnchorRename(oldData.name, newData.name));
+    tokenList.dataList.onRemove.subscribe((data) => onAnchorRename(data.name, ""));
     terrainList.dataList.onAdd.subscribe((data) => updateAnchorField());
-    terrainList.dataList.onModify.subscribe((oldData, newData) => updateAnchorField());
-    terrainList.dataList.onRemove.subscribe((data) => clearAnchors("terrain", id));
+    terrainList.dataList.onModify.subscribe((oldData, newData) => onAnchorRename(oldData.name, newData.name));
+    terrainList.dataList.onRemove.subscribe((data) => onAnchorRename(data.name, ""));
 }
 
 function start()

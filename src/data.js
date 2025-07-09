@@ -1,7 +1,6 @@
 import { isNullOrWhitespace, dequote } from "./utils";
 import { Event } from "./event";
 import { DataList } from "./dataList";
-import { anchorTagToName, anchorNameToTag } from "./anchorUtils";
 
 const terrainList = new DataList({
     name: "New TerrainFeature",
@@ -104,7 +103,7 @@ function serializeAura(aura)
     return `[aura]
 url=${aura.url}
 name=${aura.name}
-anchor=${anchorTagToName(aura.anchor)}
+anchor=${aura.anchor}
 opacity=${aura.opacity}
 size=${aura.width}x${aura.height}
 position=${aura.x},${aura.y}
@@ -267,12 +266,10 @@ function deserializeAura(lines)
 		?? [+matchLine(lines, /^cols=/i), +matchLine(lines, /^rows=/i)]
         ?? Array(2);
 
-    const anchorName = matchLine(lines, /^anchor=/i);
-
     return {
         name: matchLine(lines, /^name=/i),
         url: matchLine(lines, /^url=/i) ?? matchLine(lines, /^https?\:\/\//i, true),
-        anchor: anchorName ? anchorNameToTag(anchorName) : "",
+        anchor: matchLine(lines, /^anchor=/i),
         x, y,
         width, height
     };
