@@ -19,6 +19,11 @@ class Event
         }
     }
 
+    unsubscribeAll()
+    {
+        this.subscribers = [];
+    }
+
     invoke(...args)
     {
         for (const subscriber of this.subscribers) {
