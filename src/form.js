@@ -67,7 +67,7 @@ document.querySelector("#output-generate").addEventListener("click", (event) => 
 });
 
 document.querySelector("#output-load").addEventListener("click", (event) => {
-    Data.load(Data.deserializeData(outputArea.value));
+    Data.load(outputArea.value);
 });
 
 document.querySelector("#output-download").addEventListener("click", (event) => {
@@ -121,11 +121,10 @@ function createLoadOption(name)
     const loadButton = loadOption.querySelector("button[name='load']");
     loadButton.innerText = name;
     loadButton.addEventListener("click", () => {
-        const data = Data.deserializeData(Save.getValue(name));
-
-        if (data)
+        const serializedData = Save.getValue(name);
+        if (serializedData)
         {
-            Data.load(data);
+            Data.load(serializedData);
         }
         else
         {

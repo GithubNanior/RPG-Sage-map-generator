@@ -121,30 +121,6 @@ user=${token.user}
 `;
 }
 
-const chunkTypes = [
-    {
-        test: /^\s*\[map\]\s*$/i,
-        use: deserializeMap,
-        category: "map",
-        unique: true
-    },
-    {
-        test: /^\s*\[terrain\]\s*$/i,
-        use: deserializeTerrain,
-        category: "terrainFeatures"
-    },
-    {
-        test: /^\s*\[token\]\s*$/i,
-        use: deserializeToken,
-        category: "tokens"
-    },
-    {
-        test: /^\s*\[aura\]\s*$/i,
-        use: deserializeAura,
-        category: "auras"
-    },
-];
-
 /** 
  * Match a line and cleans it up for use, returns undefined if invalid.
  * @param {boolean} keepMatch - Whether or not to keep the part matching regex.
@@ -174,55 +150,69 @@ function matchLine(lines, regex, keepMatch = false, valueCount = 0)
     return line;
 }
 
-function deserializeData(serializedData)
+function splitChunks(serializedData)
 {
-    const chunks = Array.apply(null, new Array(chunkTypes.length)).map(() => []);
-    //#region Divide chunks
+    const chunks = [];
+    const chunkHeaderRegex = /^\s*\[(map|terrain|token|aura)\]\s*$/i;
     const lines = serializedData.split(/\r?\n\r?/).filter((value) => !isNullOrWhitespace(value));
 
-    let typeIndex = -1;
+    let isChunk = false;
     let chunkStart = 0;
     for (let i = 0; i < lines.length; i++)
-    {
-        const newTypeIndex = chunkTypes.findIndex((type) => type.test.test(lines[i]));
-        
-        if (newTypeIndex != -1)
+    {       
+        if (chunkHeaderRegex.test(lines[i]))
         {
-            if (typeIndex != -1)
+            if (isChunk)
             {
-                chunks[typeIndex].push(lines.slice(chunkStart, i));
+                chunks.push(lines.slice(chunkStart, i));
             }
-            chunkStart = i + 1;
-            typeIndex = newTypeIndex;
+            chunkStart = i;
+            isChunk = true;
         }
     }
 
-    if (typeIndex != -1)
+    if (isChunk)
     {
-        chunks[typeIndex].push(lines.slice(chunkStart, lines.length));
+        chunks.push(lines.slice(chunkStart, lines.length));
     }
-    //#endregion
 
-    const data = {};
-    //#region Deserialize chunks
-    for (let i = 0; i < chunkTypes.length; i++) {
-        const chunkType = chunkTypes[i];
-        if (!chunkType.unique)
-        {
-            data[chunkType.category] = [];
-            for (let j = 0; j < chunks[i].length; j++)
-            {
-                data[chunkType.category].push(chunkType.use(chunks[i][j]));
-            }
-        }
-        else if (chunks[i])
-        {
-            data[chunkType.category] = chunkType.use(chunks[i][0]);
-        }
+    return chunks;
+}
+
+function matchChunk(chunks, headerRegex)
+{
+    return chunks.find((chunk) => headerRegex.test(chunk[0]))
+}
+
+function matchChunks(chunks, headerRegex)
+{
+    return chunks.filter((chunk) => headerRegex.test(chunk[0]))
+}
+
+function load(serializedData)
+{
+    auraList.clear();
+    tokenList.clear();
+    terrainList.clear();
+
+
+    const chunks = splitChunks(serializedData);
+
+    const mapChunk = matchChunk(chunks, /^\s*\[map\]\s*$/i);
+    if (mapChunk)
+    {
+        const map = deserializeMap(mapChunk);
+        setName(map.name);
+        setMapURL(map.mapURL);
+        setGrid(map.gridColumns, map.gridRows);
+        setSpawn(map.spawnX, map.spawnY);
     }
-    //#endregion
-    
-    return data;
+
+    matchChunks(chunks, /^\s*\[token\]\s*$/i).forEach((chunk) => tokenList.add(deserializeToken(chunk)));
+
+    matchChunks(chunks, /^\s*\[terrain\]\s*$/i).forEach((chunk) => terrainList.add(deserializeTerrain(chunk)));
+
+    matchChunks(chunks, /^\s*\[aura\]\s*$/i).forEach((chunk) => auraList.add(deserializeAura(chunk)));
 }
 
 function deserializeMap(lines)
@@ -294,34 +284,6 @@ function deserializeToken(lines)
     };
 }
 
-function load(data)
-{
-    terrainList.clear();
-    auraList.clear();
-    tokenList.clear();
-
-    const map = data.map;
-    setName(map.name);
-    setMapURL(map.mapURL);
-    setGrid(map.gridColumns, map.gridRows);
-    setSpawn(map.spawnX, map.spawnY);
-
-    for (const terrainFeature of data.terrainFeatures)
-    {
-        terrainList.add(terrainFeature);
-    }
-
-    for (const aura of data.auras)
-    {
-        auraList.add(aura);
-    }
-
-    for (const token of data.tokens)
-    {
-        tokenList.add(token);
-    }
-}
-
 export {
     name as mapName,
     setName,
@@ -336,6 +298,5 @@ export {
     auraList,
     tokenList,
     serializeData,
-    deserializeData,
     load
 };
