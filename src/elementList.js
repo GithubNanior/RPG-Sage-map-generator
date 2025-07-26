@@ -87,11 +87,22 @@ class ElementList
         for (const input of inputs)
         {
             input.value = data[input.name];
-            input.onchange = () => {
-                this.dataList.set(data.id, {
-                    [input.name]: input.value
-                });
-            };
+            if (input.type == "number")
+            {
+                input.onchange = () => {
+                    this.dataList.set(data.id, {
+                        [input.name]: +input.value
+                    });
+                };
+            }
+            else
+            {
+                input.onchange = () => {
+                    this.dataList.set(data.id, {
+                        [input.name]: input.value
+                    });
+                };
+            }
         }
 
         const selects = element.querySelectorAll("select");
