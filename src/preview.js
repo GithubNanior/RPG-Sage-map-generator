@@ -1,6 +1,7 @@
 import Konva from "konva";
 import SpawnIcon from "./images/spawn.svg";
 import * as Data from "./data";
+import { TokenTypes } from "./tokenUtils";
 
 const container = document.querySelector("#preview");
 
@@ -115,33 +116,33 @@ function setGrid(columns, rows)
     {
         if (terrainFeatures[i])
         {
-            showToken(terrainLayer, terrainFeatures, Data.terrainList, terrainFeatures[i]);
+            showToken(terrainFeatures[i]);
         }
         else
         {
-            hideToken(terrainLayer, terrainFeatures, i);
+            hideToken(TokenTypes.TERRAIN, i);
         }
     }
     for (let i = 0; i < auras.length; i++)
     {
         if (auras[i])
         {
-            showToken(auraLayer, auras, Data.auraList, auras[i]);
+            showToken(auras[i]);
         }
         else
         {
-            hideToken(auraLayer, auras, i);
+            hideToken(TokenTypes.AURA, i);
         }
     }
     for (let i = 0; i < tokens.length; i++)
     {
         if (tokens[i])
         {
-            showToken(tokenLayer, tokens, Data.tokenList, tokens[i]);
+            showToken(tokens[i]);
         }
         else
         {
-            hideToken(tokenLayer, tokens, i);
+            hideToken(TokenTypes.TOKEN, i);
         }
     }
 }
@@ -182,10 +183,12 @@ function setSpawn(x, y)
     spawnLayer.add(spawnMarker);
 }
 
-function showToken(layer, cacheList, dataList, data)
+function showToken(data)
 {
+    const cacheList = getCacheListOfType(data.type);    
+    const token = getOrCreateToken(data.type, data.id);
     cacheList[data.id] = data;
-    const token = getOrCreateToken(layer, dataList, data.id);
+    
     token.setAttrs({
         ...tileToCanvasPos(data.x, data.y),
         width: data.width * tileWidth,
@@ -201,14 +204,67 @@ function showToken(layer, cacheList, dataList, data)
     image.src = data.url;
 }
 
-function hideToken(layer, cacheList, id)
+function hideToken(type, id)
 {
+    const cacheList = getCacheListOfType(type);
+    const layer = getLayerOfType(type)
     cacheList[id] = undefined;
     layer.children[id].visible(false);
 }
 
-function getOrCreateToken(layer, dataList, id)
+function getLayerOfType(type)
 {
+    switch (type)
+    {
+        case TokenTypes.TOKEN:
+            return tokenLayer;
+            
+        case TokenTypes.TERRAIN:
+            return terrainLayer;
+
+        case TokenTypes.AURA:
+            return auraLayer;
+    }
+    return undefined;
+}
+
+function getDataListOfType(type)
+{
+    switch (type)
+    {
+        case TokenTypes.TOKEN:
+            return Data.tokenList;
+            
+        case TokenTypes.TERRAIN:
+            return Data.terrainList;
+
+        case TokenTypes.AURA:
+            return Data.auraList;
+    }
+    return undefined;
+}
+
+function getCacheListOfType(type)
+{
+    switch (type)
+    {
+        case TokenTypes.TOKEN:
+            return tokens;
+            
+        case TokenTypes.TERRAIN:
+            return terrainFeatures;
+
+        case TokenTypes.AURA:
+            return auras;
+    }
+    return undefined;
+}
+
+function getOrCreateToken(type, id)
+{
+    const layer = getLayerOfType(type);
+    const dataList = getDataListOfType(type);
+
     while (id >= layer.children.length)
     {
         const token = new Konva.Image({
@@ -257,17 +313,17 @@ function link()
     Data.onGridSet.subscribe((columns, rows) => setGrid(columns, rows));
     Data.onSpawnSet.subscribe((x, y) => setSpawn(x, y));
 
-    Data.terrainList.onAdd.subscribe((data) => showToken(terrainLayer, terrainFeatures, Data.terrainList, data));
-    Data.terrainList.onModify.subscribe((oldData, newData) => showToken(terrainLayer, terrainFeatures, Data.terrainList, newData));
-    Data.terrainList.onRemove.subscribe((data) => hideToken(terrainLayer, terrainFeatures, data.id));
+    Data.terrainList.onAdd.subscribe((data) => showToken(data));
+    Data.terrainList.onModify.subscribe((oldData, newData) => showToken(newData));
+    Data.terrainList.onRemove.subscribe((data) => hideToken(data.type, data.id));
 
-    Data.auraList.onAdd.subscribe((data) => showToken(auraLayer, auras, Data.auraList, data));
-    Data.auraList.onModify.subscribe((oldData, newData) => showToken(auraLayer, auras, Data.auraList, newData));
-    Data.auraList.onRemove.subscribe((data) => hideToken(auraLayer, auras, data.id));
+    Data.auraList.onAdd.subscribe((data) => showToken(data));
+    Data.auraList.onModify.subscribe((oldData, newData) => showToken(newData));
+    Data.auraList.onRemove.subscribe((data) => hideToken(data.type, data.id));
 
-    Data.tokenList.onAdd.subscribe((data) => showToken(tokenLayer, tokens, Data.tokenList, data));
-    Data.tokenList.onModify.subscribe((oldData, newData) => showToken(tokenLayer, tokens, Data.tokenList, newData));
-    Data.tokenList.onRemove.subscribe((data) => hideToken(tokenLayer, tokens, data.id));
+    Data.tokenList.onAdd.subscribe((data) => showToken(data));
+    Data.tokenList.onModify.subscribe((oldData, newData) => showToken(newData));
+    Data.tokenList.onRemove.subscribe((data) => hideToken(data.type, data.id));
 }
 
 window.addEventListener("resize", (event) => resizePreview());

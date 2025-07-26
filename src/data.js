@@ -1,9 +1,11 @@
 import { isNullOrWhitespace, dequote } from "./utils";
 import { Event } from "./event";
 import { DataList } from "./dataList";
+import { TokenTypes } from "./tokenUtils";
 
 const terrainList = new DataList({
     name: "New TerrainFeature",
+    type: TokenTypes.TERRAIN,
     url: "",
     x: 1,
     y: 1,
@@ -12,6 +14,7 @@ const terrainList = new DataList({
 });
 const auraList = new DataList({
     name: "New Aura",
+    type: TokenTypes.AURA,
     anchor: "",
     opacity: 0.5,
     url: "",
@@ -22,6 +25,7 @@ const auraList = new DataList({
 });
 const tokenList = new DataList({
     name: "New Token",
+    type: TokenTypes.TOKEN,
     url: "",
     x: 1,
     y: 1,
