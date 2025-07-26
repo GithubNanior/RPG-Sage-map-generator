@@ -2,8 +2,12 @@ import Konva from "konva";
 import SpawnIcon from "./images/spawn.svg";
 import * as Data from "./data";
 import { TokenTypes } from "./tokenUtils";
+import { LogError } from "./logger";
+import { Event } from "./event";
+import { getAnchorInfo } from "./anchorUtils";
 
 const container = document.querySelector("#preview");
+const snapStep = 100;
 
 const stage = new Konva.Stage({
     container: "preview",
@@ -112,39 +116,25 @@ function setGrid(columns, rows)
     }
 
     setSpawn(spawnX, spawnY);
-    for (let i = 0; i < terrainFeatures.length; i++)
-    {
-        if (terrainFeatures[i])
+    
+    terrainFeatures.forEach((terrainFeature) => {
+        if (terrainFeature)
         {
-            showToken(terrainFeatures[i]);
+            updateToken(terrainFeature);
         }
-        else
+    });
+    tokens.forEach((token) => {
+        if (token)
         {
-            hideToken(TokenTypes.TERRAIN, i);
+            updateToken(token);
         }
-    }
-    for (let i = 0; i < auras.length; i++)
-    {
-        if (auras[i])
+    });
+    auras.forEach((aura) => {
+        if (aura)
         {
-            showToken(auras[i]);
+            updateToken(aura);
         }
-        else
-        {
-            hideToken(TokenTypes.AURA, i);
-        }
-    }
-    for (let i = 0; i < tokens.length; i++)
-    {
-        if (tokens[i])
-        {
-            showToken(tokens[i]);
-        }
-        else
-        {
-            hideToken(TokenTypes.TOKEN, i);
-        }
-    }
+    });
 }
 
 function setSpawn(x, y)
@@ -185,7 +175,14 @@ function setSpawn(x, y)
 
 function showToken(data)
 {
-    const cacheList = getCacheListOfType(data.type);    
+    const cacheList = getCacheListOfType(data.type);
+
+    if (cacheList[data.id])
+    {
+        LogError("Cannot show a token that is already being shown! If you intend to refresh a token, use updateToken instead!")
+        return;
+    }
+
     const token = getOrCreateToken(data.type, data.id);
     cacheList[data.id] = data;
     
@@ -193,7 +190,7 @@ function showToken(data)
         ...tileToCanvasPos(data.x, data.y),
         width: data.width * tileWidth,
         height: data.height * tileHeight,
-        visible: false
+        opacity: data.opacity === undefined ? 1 : data.opacity
     });
 
     const image = new Image();
@@ -202,14 +199,115 @@ function showToken(data)
         token.visible(true);
     };
     image.src = data.url;
+
+    //Event subscriptions are different depending on whether this token has an anchor or not
+    const anchorInfo = data.anchor ? getAnchorInfo(data.anchor) : undefined;
+    if (anchorInfo)
+    {
+        const anchor = getLayerOfType(anchorInfo?.type)?.children[anchorInfo.id];
+
+        const anchorData = getCacheListOfType(anchorInfo.type)[anchorInfo.id];
+        displayAuraRelative(anchorData, data);
+
+        anchor.onDrag.subscribe((x, y) => {
+            const currentData = auras[data.id];
+            const offset = tileToCanvasPos(currentData.x + 1, currentData.y + 1);
+            token.setAttrs({
+                x: x + offset.x,
+                y: y + offset.y
+            });
+        });
+
+        token.onDrop.subscribe((x, y) => {
+            const anchorData = getCacheListOfType(anchorInfo.type)[anchorInfo.id];
+            const tilePos = canvasToTilePos(x, y);
+            tilePos.x -= anchorData.x;
+            tilePos.y -= anchorData.y;
+            
+            getDataListOfType(data.type).set(data.id, {
+                x: Math.round(tilePos.x * snapStep) / snapStep,
+                y: Math.round(tilePos.y * snapStep) / snapStep
+            });
+        });
+    }
+    else
+    {
+        token.onDrop.subscribe((x, y) => {
+            const tilePos = canvasToTilePos(x, y);
+            getDataListOfType(data.type).set(data.id, {
+                x: Math.round(tilePos.x * snapStep) / snapStep,
+                y: Math.round(tilePos.y * snapStep) / snapStep
+            });
+        });
+    }
+}
+
+function updateToken(data)
+{
+    const cacheList = getCacheListOfType(data.type);
+
+    const cachedData = cacheList[data.id];
+    cacheList[data.id] = data;
+
+    const token = getOrCreateToken(data.type, data.id);
+    token.setAttrs({
+        ...tileToCanvasPos(data.x, data.y),
+        width: data.width * tileWidth,
+        height: data.height * tileHeight,
+        opacity: data.opacity === undefined ? 1 : data.opacity
+    });
+
+    if (cachedData.url != data.url)
+    {
+        const image = new Image();
+        image.onload = () => {
+            token.image(image);
+            token.visible(true);
+        };
+        image.src = data.url;
+    }
+
+    const anchorInfo = data.anchor ? getAnchorInfo(data.anchor) : undefined;
+    if (anchorInfo)
+    {
+        const anchorData = getCacheListOfType(anchorInfo.type)[anchorInfo.id];
+        displayAuraRelative(anchorData, data);
+    }
 }
 
 function hideToken(type, id)
 {
     const cacheList = getCacheListOfType(type);
-    const layer = getLayerOfType(type)
+
+    const token = getLayerOfType(type).children[id];
+
+    token.onDrag.unsubscribeAll();
+    token.onDrop.unsubscribeAll();
+
     cacheList[id] = undefined;
-    layer.children[id].visible(false);
+    token.visible(false);
+}
+
+function displayAuraRelative(anchorData, auraData)
+{
+    if (anchorData)
+    {
+        auraLayer.children[auraData.id].setAttrs({
+            ...tileToCanvasPos(anchorData.x + auraData.x, anchorData.y + auraData.y)
+        });
+    }
+}
+
+function displayAurasRelative(anchorData)
+{
+    for (let i = 0; i < auras.length; i++) {
+        if (auras[i].anchor == anchorData.name)
+        {
+            auraLayer.children[i].setAttrs({
+                ...tileToCanvasPos(anchorData.x + auras[i].x, anchorData.y + auras[i].y)
+            });
+        }
+    }
 }
 
 function getLayerOfType(type)
@@ -263,7 +361,6 @@ function getCacheListOfType(type)
 function getOrCreateToken(type, id)
 {
     const layer = getLayerOfType(type);
-    const dataList = getDataListOfType(type);
 
     while (id >= layer.children.length)
     {
@@ -272,18 +369,11 @@ function getOrCreateToken(type, id)
             visible: false
         });
 
-        token.on("dragend", () => {
-            let tilePos = canvasToTilePos(token.x(), token.y());
-            tilePos = {
-                x: Math.round(tilePos.x * 100) / 100,
-                y: Math.round(tilePos.y * 100) / 100
-            };
+        token.onDrag = new Event();
+        token.onDrop = new Event();
 
-            dataList.set(id, {
-                x: tilePos.x,
-                y: tilePos.y
-            });
-        });
+        token.on("dragmove", () => token.onDrag.invoke(token.x(), token.y()));
+        token.on("dragend", () => token.onDrop.invoke(token.x(), token.y()));
 
         layer.add(token);
     }
@@ -314,16 +404,28 @@ function link()
     Data.onSpawnSet.subscribe((x, y) => setSpawn(x, y));
 
     Data.terrainList.onAdd.subscribe((data) => showToken(data));
-    Data.terrainList.onModify.subscribe((oldData, newData) => showToken(newData));
-    Data.terrainList.onRemove.subscribe((data) => hideToken(data.type, data.id));
+    Data.terrainList.onModify.subscribe((oldData, newData) => {
+        updateToken(newData)
+        if (oldData.x != newData.x || oldData.y != newData.y)
+        {
+            displayAurasRelative(newData);
+        }
+    });
+    Data.terrainList.onRemove.subscribe((data) => hideToken(TokenTypes.TERRAIN, data.id));
 
     Data.auraList.onAdd.subscribe((data) => showToken(data));
-    Data.auraList.onModify.subscribe((oldData, newData) => showToken(newData));
-    Data.auraList.onRemove.subscribe((data) => hideToken(data.type, data.id));
+    Data.auraList.onModify.subscribe((oldData, newData) => updateToken(newData));
+    Data.auraList.onRemove.subscribe((data) => hideToken(TokenTypes.AURA, data.id));
 
     Data.tokenList.onAdd.subscribe((data) => showToken(data));
-    Data.tokenList.onModify.subscribe((oldData, newData) => showToken(newData));
-    Data.tokenList.onRemove.subscribe((data) => hideToken(data.type, data.id));
+    Data.tokenList.onModify.subscribe((oldData, newData) => {
+        updateToken(newData)
+        if (oldData.x != newData.x || oldData.y != newData.y)
+        {
+            displayAurasRelative(newData);
+        }
+    });
+    Data.tokenList.onRemove.subscribe((data) => hideToken(TokenTypes.TOKEN, data.id));
 }
 
 window.addEventListener("resize", (event) => resizePreview());
