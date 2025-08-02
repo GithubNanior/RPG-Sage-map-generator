@@ -1,0 +1,1 @@
+(self.webpackChunktodo_list=self.webpackChunktodo_list||[]).push([[210],{7210:()=>{const e=document.querySelector("#tabs"),t=document.querySelectorAll('[id^="tab-"]');function s(e){for(const s of t)s.id.endsWith(e)?s.classList.remove("hidden"):s.classList.add("hidden")}e.addEventListener("click",(e=>{s(e.target.value)})),s("main")}}]);
