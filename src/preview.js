@@ -21,16 +21,6 @@ let mapHeight = 0;
 let tileWidth = 0;
 let tileHeight = 0;
 
-let gridColumns = 1;
-let gridRows = 1;
-
-let spawnX = 1;
-let spawnY = 1;
-
-const terrainFeatures = [];
-const auras = [];
-const tokens = [];
-
 const mapLayer = new Konva.Layer();
 stage.add(mapLayer);
 
@@ -69,7 +59,7 @@ function setMap(mapURL)
             image
         }));
 
-        setGrid(gridColumns, gridRows);
+        setGrid(Data.gridColumns, Data.gridRows);
     };
     image.src = mapURL;
 }
@@ -87,13 +77,10 @@ function setGrid(columns, rows)
 {
     gridLayer.destroyChildren();
 
-    gridColumns = columns;
-    gridRows = rows;
+    tileWidth = mapWidth / columns;
+    tileHeight = mapHeight / rows;
 
-    tileWidth = mapWidth / gridColumns;
-    tileHeight = mapHeight / gridRows;
-
-    for (let column = 1; column < gridColumns; column++)
+    for (let column = 1; column < columns; column++)
     {
         const x = column * tileWidth;
         gridLayer.add(new Konva.Line({
@@ -104,7 +91,7 @@ function setGrid(columns, rows)
         }));
     }
 
-    for (let row = 1; row < gridRows; row++) 
+    for (let row = 1; row < rows; row++) 
     {
         const y = row * tileHeight;
         gridLayer.add(new Konva.Line({
@@ -115,21 +102,21 @@ function setGrid(columns, rows)
         }));
     }
 
-    setSpawn(spawnX, spawnY);
-    
-    terrainFeatures.forEach((terrainFeature) => {
+    setSpawn(Data.spawnX, Data.spawnY);
+
+    Data.terrainList.listElements.forEach((terrainFeature) => {
         if (terrainFeature)
         {
             updateToken(terrainFeature);
         }
     });
-    tokens.forEach((token) => {
+    Data.tokenList.listElements.forEach((token) => {
         if (token)
         {
             updateToken(token);
         }
     });
-    auras.forEach((aura) => {
+    Data.auraList.listElements.forEach((aura) => {
         if (aura)
         {
             updateToken(aura);
@@ -141,9 +128,6 @@ function setSpawn(x, y)
 {
     spawnLayer.destroyChildren();
 
-    spawnX = x;
-    spawnY = y;
-
     const image = new Image();
     image.src = SpawnIcon;
 
@@ -151,7 +135,7 @@ function setSpawn(x, y)
     image.height = 50;
 
     const spawnMarker = new Konva.Image({
-        ...tileToCanvasPos(spawnX, spawnY),
+        ...tileToCanvasPos(x, y),
         offsetX: image.width / 2,
         offsetY: image.height / 2,
         width: image.width,
@@ -175,16 +159,7 @@ function setSpawn(x, y)
 
 function showToken(data)
 {
-    const cacheList = getCacheListOfType(data.type);
-
-    if (cacheList[data.id])
-    {
-        LogError("Cannot show a token that is already being shown! If you intend to refresh a token, use updateToken instead!")
-        return;
-    }
-
     const token = getOrCreateToken(data.type, data.id);
-    cacheList[data.id] = data;
     
     token.setAttrs({
         ...tileToCanvasPos(data.x, data.y),
@@ -206,11 +181,11 @@ function showToken(data)
     {
         const anchor = getLayerOfType(anchorInfo?.type)?.children[anchorInfo.id];
 
-        const anchorData = getCacheListOfType(anchorInfo.type)[anchorInfo.id];
+        const anchorData = getDataListOfType(anchorInfo.type).listElements[anchorInfo.id];
         displayAuraRelative(anchorData, data);
 
         anchor.onDrag.subscribe((x, y) => {
-            const currentData = auras[data.id];
+            const currentData = Data.auraList.listElements[data.id];
             const offset = tileToCanvasPos(currentData.x + 1, currentData.y + 1);
             token.setAttrs({
                 x: x + offset.x,
@@ -219,7 +194,7 @@ function showToken(data)
         });
 
         token.onDrop.subscribe((x, y) => {
-            const anchorData = getCacheListOfType(anchorInfo.type)[anchorInfo.id];
+            const anchorData = getDataListOfType(anchorInfo.type).listElements[anchorInfo.id];
             const tilePos = canvasToTilePos(x, y);
             tilePos.x -= anchorData.x;
             tilePos.y -= anchorData.y;
@@ -244,11 +219,6 @@ function showToken(data)
 
 function updateToken(data)
 {
-    const cacheList = getCacheListOfType(data.type);
-
-    const cachedData = cacheList[data.id];
-    cacheList[data.id] = data;
-
     const token = getOrCreateToken(data.type, data.id);
     token.setAttrs({
         ...tileToCanvasPos(data.x, data.y),
@@ -257,7 +227,7 @@ function updateToken(data)
         opacity: data.opacity === undefined ? 1 : data.opacity
     });
 
-    if (cachedData.url != data.url)
+    if (token.url != data.url)
     {
         const image = new Image();
         image.onload = () => {
@@ -270,21 +240,19 @@ function updateToken(data)
     const anchorInfo = data.anchor ? getAnchorInfo(data.anchor) : undefined;
     if (anchorInfo)
     {
-        const anchorData = getCacheListOfType(anchorInfo.type)[anchorInfo.id];
+        const anchorData = getDataListOfType(anchorInfo.type).listElements[anchorInfo.id];
         displayAuraRelative(anchorData, data);
     }
 }
 
 function hideToken(type, id)
 {
-    const cacheList = getCacheListOfType(type);
-
     const token = getLayerOfType(type).children[id];
 
     token.onDrag.unsubscribeAll();
     token.onDrop.unsubscribeAll();
 
-    cacheList[id] = undefined;
+    getDataListOfType(type).listElements[id] = undefined;
     token.visible(false);
 }
 
@@ -300,14 +268,14 @@ function displayAuraRelative(anchorData, auraData)
 
 function displayAurasRelative(anchorData)
 {
-    for (let i = 0; i < auras.length; i++) {
-        if (auras[i].anchor == anchorData.name)
+    Data.auraList.listElements.forEach((aura)=>{
+        if (aura && aura.anchor == anchorData.name)
         {
-            auraLayer.children[i].setAttrs({
-                ...tileToCanvasPos(anchorData.x + auras[i].x, anchorData.y + auras[i].y)
+            auraLayer.children[aura.id].setAttrs({
+                ...tileToCanvasPos(anchorData.x + aura.x, anchorData.y + aura.y)
             });
         }
-    }
+    })
 }
 
 function getLayerOfType(type)
@@ -338,22 +306,6 @@ function getDataListOfType(type)
 
         case TokenTypes.AURA:
             return Data.auraList;
-    }
-    return undefined;
-}
-
-function getCacheListOfType(type)
-{
-    switch (type)
-    {
-        case TokenTypes.TOKEN:
-            return tokens;
-            
-        case TokenTypes.TERRAIN:
-            return terrainFeatures;
-
-        case TokenTypes.AURA:
-            return auras;
     }
     return undefined;
 }
