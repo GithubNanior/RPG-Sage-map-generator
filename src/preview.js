@@ -5,9 +5,17 @@ import { TokenTypes } from "./tokenUtils";
 import { LogError } from "./logger";
 import { Event } from "./event";
 import { getAnchorInfo } from "./anchorUtils";
+import { hexToRgba } from "./utils";
 
 const container = document.querySelector("#preview");
-const snapStep = 100;
+let snapStep = 1;
+let gizmoColorHex = "#00000088"
+let gizmoColor = {
+    red: 0,
+    green: 0,
+    blue: 0,
+    opacity: 0.5
+}
 
 const stage = new Konva.Stage({
     container: "preview",
@@ -85,8 +93,7 @@ function setGrid(columns, rows)
         const x = column * tileWidth;
         gridLayer.add(new Konva.Line({
             points: [x, 0, x, mapHeight],
-            stroke: "black",
-            opacity: 0.4,
+            stroke: gizmoColorHex,
             strokeWidth: 1
         }));
     }
@@ -96,8 +103,7 @@ function setGrid(columns, rows)
         const y = row * tileHeight;
         gridLayer.add(new Konva.Line({
             points: [0, y, mapWidth, y],
-            stroke: "black",
-            opacity: 0.4,
+            stroke: gizmoColorHex,
             strokeWidth: 1
         }));
     }
@@ -136,6 +142,8 @@ function setSpawn(x, y)
 
     const spawnMarker = new Konva.Image({
         ...tileToCanvasPos(x, y),
+        filters: [Konva.Filters.RGB],
+        ...gizmoColor,
         offsetX: image.width / 2,
         offsetY: image.height / 2,
         width: image.width,
@@ -144,17 +152,32 @@ function setSpawn(x, y)
         draggable: true
     });
 
+    spawnMarker.cache();
+
     spawnMarker.on("dragend", () => {
         let tilePos = canvasToTilePos(spawnMarker.x(), spawnMarker.y());
         tilePos = {
-            x: Math.round(tilePos.x * 100) / 100,
-            y: Math.round(tilePos.y * 100) / 100
+            x: Math.round(tilePos.x / snapStep) * snapStep,
+            y: Math.round(tilePos.y / snapStep) * snapStep
         };
 
         Data.setSpawn(tilePos.x, tilePos.y);
     });
 
     spawnLayer.add(spawnMarker);
+}
+
+function setSnapStep(step)
+{
+    snapStep = step;
+}
+
+function setGizmoColor(hex)
+{
+    gizmoColorHex = hex;
+    gizmoColor = hexToRgba(hex);
+    setGrid(Data.gridColumns, Data.gridRows);
+    setSpawn(Data.spawnX, Data.spawnY);
 }
 
 function showToken(data)
@@ -200,8 +223,8 @@ function showToken(data)
             tilePos.y -= anchorData.y;
             
             getDataListOfType(data.type).set(data.id, {
-                x: Math.round(tilePos.x * snapStep) / snapStep,
-                y: Math.round(tilePos.y * snapStep) / snapStep
+                x: Math.round(tilePos.x / snapStep) * snapStep,
+                y: Math.round(tilePos.y / snapStep) * snapStep
             });
         });
     }
@@ -210,8 +233,8 @@ function showToken(data)
         token.onDrop.subscribe((x, y) => {
             const tilePos = canvasToTilePos(x, y);
             getDataListOfType(data.type).set(data.id, {
-                x: Math.round(tilePos.x * snapStep) / snapStep,
-                y: Math.round(tilePos.y * snapStep) / snapStep
+                x: Math.round(tilePos.x / snapStep) * snapStep,
+                y: Math.round(tilePos.y / snapStep) * snapStep
             });
         });
     }
@@ -383,5 +406,7 @@ function link()
 window.addEventListener("resize", (event) => resizePreview());
 
 export {
-    link
+    link,
+    setSnapStep,
+    setGizmoColor
 };

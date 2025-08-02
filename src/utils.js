@@ -23,9 +23,21 @@ function dequote(value)
 	return regex.test(value) ? value.slice(1, -1) : value;
 }
 
+function hexToRgba(hex)
+{
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        red: parseInt(result[1], 16),
+        green: parseInt(result[2], 16),
+        blue: parseInt(result[3], 16),
+        opacity: parseInt(result[4], 16)/255,
+    } : null;
+}
+
 export {
     parseHtml,
     downloadTXT,
     isNullOrWhitespace,
-    dequote
+    dequote,
+    hexToRgba
 };

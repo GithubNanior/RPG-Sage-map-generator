@@ -1,3 +1,4 @@
+import * as Preview from "./preview";
 import * as Data from "./data";
 import * as Save from "./save";
 import { LogError } from "./logger";
@@ -7,6 +8,7 @@ import editTerrainFeatureHTML from "./editForm-TerrainFeature.html";
 import editAuraHTML from "./editForm-Aura.html";
 import editTokenHTML from "./editForm-Token.html";
 import loadOptionHTML from "./loadOption.html";
+import Spectrum from "spectrum-vanilla";
 
 const terrainList = new ElementList(document.querySelector("#terrain-list"), editTerrainFeatureHTML);
 const auraList = new ElementList(document.querySelector("#aura-list"), editAuraHTML);
@@ -20,6 +22,12 @@ const gridColumnsField = document.querySelector("#grid-columns-field");
 const gridRowsField = document.querySelector("#grid-rows-field");
 const spawnXField = document.querySelector("#spawn-x-field");
 const spawnYField = document.querySelector("#spawn-y-field");
+const snapStepField = document.querySelector("#snapstep-field");
+const gizmoColorField = Spectrum.create("#gizmocolor-field", {
+    type: "color",
+    showPalette: false,
+    allowEmpty: false
+});
 
 /** @type HTMLSelectElement */
 const auraAnchorField = auraList.editForm.querySelector("#aura-anchor-field");
@@ -50,27 +58,34 @@ spawnYField.addEventListener("change", () => {
     Data.setSpawn(spawnXField.value, spawnYField.value);
 });
 
-document.querySelector("#terrain-add").addEventListener("click", (event) => {
+snapStepField.addEventListener("change", () => {
+    Preview.setSnapStep(snapStepField.value);
+});
+gizmoColorField.on("move", () => {
+    Preview.setGizmoColor(gizmoColorField.get().toHex8String());
+});
+
+document.querySelector("#terrain-add").addEventListener("click", () => {
     Data.terrainList.add();
 });
 
-document.querySelector("#aura-add").addEventListener("click", (event) => {
+document.querySelector("#aura-add").addEventListener("click", () => {
     Data.auraList.add();
 });
 
-document.querySelector("#token-add").addEventListener("click", (event) => {
+document.querySelector("#token-add").addEventListener("click", () => {
     Data.tokenList.add();
 });
 
-document.querySelector("#output-generate").addEventListener("click", (event) => {
+document.querySelector("#output-generate").addEventListener("click", () => {
     outputArea.value = Data.serializeData();
 });
 
-document.querySelector("#output-load").addEventListener("click", (event) => {
+document.querySelector("#output-load").addEventListener("click", () => {
     Data.load(outputArea.value);
 });
 
-document.querySelector("#output-download").addEventListener("click", (event) => {
+document.querySelector("#output-download").addEventListener("click", () => {
     downloadTXT(Data.mapName.replaceAll(" ", "_"), Data.serializeData());
 });
 
@@ -216,6 +231,8 @@ function start()
     Data.setMapURL(mapURLField.value);
     Data.setGrid(gridColumnsField.value, gridRowsField.value);
     Data.setSpawn(spawnXField.value, spawnYField.value);
+    Preview.setSnapStep(snapStepField.value);
+    Preview.setGizmoColor(gizmoColorField.get().toHex8String());
 }
 
 export {
