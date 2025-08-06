@@ -68,6 +68,7 @@ header a {
     scale: 1 0;
     transform-origin: top;
     transition: scale 0.1s;
+    z-index: 10;
 
     position: absolute;
     left: -1px;
