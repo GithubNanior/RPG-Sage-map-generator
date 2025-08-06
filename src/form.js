@@ -104,29 +104,21 @@ document.querySelector("#save").addEventListener("click", () => {
     }
 });
 
-let dropdownOpen = false;
-loadTab.addEventListener("pointerenter", () => {
-    if (dropdownOpen == false)
-    {
-        for (let i = 0; i < Save.saveCount(); i++)
-        {
-            loadOptionContainer.appendChild(createLoadOption(Save.getKey(i)));
-        }
-        dropdownOpen = true;
-    }
-});
-
-loadTab.addEventListener("pointerleave", () => {
-    loadOptionContainer.innerHTML = "";
-    dropdownOpen = false;
-});
-
 function createOptionElement(value)
 {
     const option = document.createElement("option");
     option.setAttribute("value", value);
     option.innerText = isNullOrWhitespace(value) ? "None" : value;
     return option;
+}
+
+function refreshLoadOptions()
+{
+    loadOptionContainer.innerHTML = "";
+    for (let i = 0; i < Save.saveCount(); i++)
+    {
+        loadOptionContainer.appendChild(createLoadOption(Save.getKey(i)));
+    }
 }
 
 function createLoadOption(name)
@@ -150,7 +142,6 @@ function createLoadOption(name)
     const deleteButton = loadOption.querySelector("button[name='delete']")
     deleteButton.addEventListener("click", () => {
         Save.deleteSave(name);
-        loadOption.remove();
     });
 
     return loadOption;
@@ -223,6 +214,9 @@ function link()
     terrainList.dataList.onAdd.subscribe((data) => updateAnchorField());
     terrainList.dataList.onModify.subscribe((oldData, newData) => onAnchorRename(oldData.name, newData.name));
     terrainList.dataList.onRemove.subscribe((data) => onAnchorRename(data.name, ""));
+
+    Save.onSaveAdd.subscribe(() => refreshLoadOptions());
+    Save.onSaveRemove.subscribe(() => refreshLoadOptions());
 }
 
 function start()
@@ -233,6 +227,8 @@ function start()
     Data.setSpawn(spawnXField.value, spawnYField.value);
     Preview.setSnapStep(snapStepField.value);
     Preview.setGizmoColor(gizmoColorField.get().toHex8String());
+
+    refreshLoadOptions();
 }
 
 export {

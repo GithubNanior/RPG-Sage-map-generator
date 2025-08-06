@@ -1,3 +1,8 @@
+import { Event } from "./event";
+
+const onSaveAdd = new Event();
+const onSaveRemove = new Event();
+
 function canSave()
 {
     try {
@@ -28,11 +33,13 @@ function getValue(key)
 function save(key, value)
 {
     window.localStorage.setItem(key, value);
+    onSaveAdd.invoke();
 }
 
 function deleteSave(key)
 {
     window.localStorage.removeItem(key);
+    onSaveRemove.invoke();
 }
 
 export {
@@ -41,5 +48,7 @@ export {
     getKey,
     getValue,
     save,
-    deleteSave
+    deleteSave,
+    onSaveAdd,
+    onSaveRemove
 };
