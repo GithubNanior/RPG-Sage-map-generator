@@ -1,8 +1,5 @@
-function LogError(message)
-{
-    console.error(message);
+function LogError(message) {
+  console.error(message);
 }
 
-export {
-    LogError
-};
+export { LogError };

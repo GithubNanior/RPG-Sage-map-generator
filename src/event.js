@@ -1,37 +1,28 @@
-class Event
-{
-    constructor()
-    {
-        this.subscribers = [];
-    }
+class Event {
+  constructor() {
+    this.subscribers = [];
+  }
 
-    subscribe(subscriber)
-    {
-        this.subscribers.push(subscriber);
-    }
+  subscribe(subscriber) {
+    this.subscribers.push(subscriber);
+  }
 
-    unsubscribe(subsciber)
-    {
-        const index = this.subscribers.indexOf(subsciber);
-        if (index != -1)
-        {
-            this.subscribers.splice(index, 1)
-        }
+  unsubscribe(subsciber) {
+    const index = this.subscribers.indexOf(subsciber);
+    if (index != -1) {
+      this.subscribers.splice(index, 1);
     }
+  }
 
-    unsubscribeAll()
-    {
-        this.subscribers = [];
-    }
+  unsubscribeAll() {
+    this.subscribers = [];
+  }
 
-    invoke(...args)
-    {
-        for (const subscriber of this.subscribers) {
-            subscriber(...args);
-        }
+  invoke(...args) {
+    for (const subscriber of this.subscribers) {
+      subscriber(...args);
     }
+  }
 }
 
-export {
-    Event
-};
+export { Event };
